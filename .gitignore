@@ -1,3 +1,6 @@
 target/
 .env
 *.class
+.idea/
+*.iml
+*.html

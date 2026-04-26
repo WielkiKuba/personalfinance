@@ -46,7 +46,11 @@ public class UserService {
         User userToAdd = getUserById(userToModifyId);
         if(userSession.getId().equals(house.getOwner().getId())){
             if(isAdding){
-                userToAdd.setHouse(house);
+                if(userToAdd.getHouse().getId()==null){
+                    userToAdd.setHouse(house);
+                }else{
+                    throw new SecurityException("No permissions. User already is on another house");
+                }
             }else{
                 userToAdd.setHouse(null);
             }

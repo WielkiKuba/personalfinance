@@ -1,20 +1,46 @@
-# 📘 Personal Finance API
+# Personal Finance API
 
-REST API do zarządzania użytkownikami, domami, kategoriami i transakcjami finansowymi.
+REST API do zarządzania finansami osobistymi — użytkownicy, domy, kategorie i transakcje.
+
+## Tech Stack
+
+- Java 26 + Spring Boot
+- MySQL
+- Flyway
+- Docker
+
+## Uruchomienie
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+Aplikacja dostępna pod: `http://localhost:8080`
 
 ---
 
-# 🚀 Base URL
-/api
+## API Reference
 
----
+### Users `/api/user`
 
-# 🧑 USER API
+| Method | Endpoint | Opis |
+|--------|----------|------|
+| `GET` | `/api/user` | Lista wszystkich użytkowników |
+| `GET` | `/api/user/{id}` | Użytkownik po ID |
+| `GET` | `/api/user/name/{name}` | Użytkownik po imieniu |
+| `GET` | `/api/user/surname/{surname}` | Użytkownik po nazwisku |
+| `GET` | `/api/user/house/{houseId}` | Użytkownicy przypisani do domu |
+| `POST` | `/api/user` | Utwórz użytkownika |
+| `POST` | `/api/user/assign` | Przypisz użytkownika do domu |
+| `POST` | `/api/user/remove` | Usuń użytkownika z domu |
+| `PATCH` | `/api/user/{id}` | Zaktualizuj użytkownika |
+| `DELETE` | `/api/user/{id}` | Usuń użytkownika |
 
-## ➕ Create user
-POST /api/user
+<details>
+<summary>Przykłady requestów</summary>
 
-### Body:
+**POST** `/api/user`
 ```json
 {
   "name": "Jan",
@@ -22,12 +48,7 @@ POST /api/user
 }
 ```
 
----
-
-## ✏️ Update user
-PATCH /api/user/{id}
-
-### Body:
+**PATCH** `/api/user/{id}`
 ```json
 {
   "name": "Jan",
@@ -36,12 +57,7 @@ PATCH /api/user/{id}
 }
 ```
 
----
-
-## 🏠 Assign user to house
-POST /api/user/assign
-
-### Body:
+**POST** `/api/user/assign` i `/api/user/remove`
 ```json
 {
   "userId": 1,
@@ -49,54 +65,25 @@ POST /api/user/assign
   "userToModifyId": 3
 }
 ```
+</details>
 
 ---
 
-## 🏠 Remove user from house
-POST /api/user/remove
+### Houses `/api/house`
 
-### Body:
-```json
-{
-  "userId": 1,
-  "houseId": 2,
-  "userToModifyId": 3
-}
-```
+| Method | Endpoint | Opis |
+|--------|----------|------|
+| `GET` | `/api/house/{id}` | Dom po ID |
+| `GET` | `/api/house/street/{street}` | Domy po ulicy |
+| `GET` | `/api/house/streetAndNumber/{street}/{number}` | Dom po ulicy i numerze |
+| `GET` | `/api/house/owner/{ownerId}` | Dom po właścicielu |
+| `POST` | `/api/house` | Utwórz dom |
+| `DELETE` | `/api/house/{id}` | Usuń dom |
 
----
+<details>
+<summary>Przykłady requestów</summary>
 
-## 📄 Get all users
-GET /api/user
-
----
-
-## 🔍 Get user by id
-GET /api/user/{id}
-
----
-
-## 🔍 Get user by name
-GET /api/user/name/{name}
-
----
-
-## 🔍 Get user by surname
-GET /api/user/surname/{surname}
-
----
-
-## ❌ Delete user
-DELETE /api/user/{id}
-
----
-
-# 🏡 HOUSE API
-
-## ➕ Create house
-POST /api/house
-
-### Body:
+**POST** `/api/house`
 ```json
 {
   "street": "Dębowa",
@@ -104,40 +91,39 @@ POST /api/house
   "owner_id": 1
 }
 ```
+</details>
 
 ---
 
-## 🔍 Get house by id
-GET /api/house/{id}
+### Transactions `/api/transactions`
 
----
+| Method | Endpoint | Opis |
+|--------|----------|------|
+| `GET` | `/api/transactions` | Lista wszystkich transakcji |
+| `GET` | `/api/transactions/{id}` | Transakcja po ID |
+| `GET` | `/api/transactions/search` | Wyszukaj transakcje (filtry) |
+| `GET` | `/api/transactions/user/{userId}/summary` | Podsumowanie użytkownika |
+| `GET` | `/api/transactions/house/{houseId}/summary` | Podsumowanie domu |
+| `POST` | `/api/transactions` | Utwórz transakcję |
+| `PATCH` | `/api/transactions/{id}` | Zaktualizuj transakcję |
+| `DELETE` | `/api/transactions/{id}` | Usuń transakcję |
 
-## 🔍 Get house by street
-GET /api/house/street/{street}
+#### GET `/api/transactions/search` — parametry
 
----
+| Parametr | Wymagany | Opis |
+|----------|----------|------|
+| `userId` | ✅ | ID użytkownika |
+| `minAmount` | ❌ | Minimalna kwota |
+| `maxAmount` | ❌ | Maksymalna kwota |
+| `startDate` | ❌ | Data od (YYYY-MM-DD) |
+| `endDate` | ❌ | Data do (YYYY-MM-DD) |
+| `type` | ❌ | `INCOME` lub `EXPENSE` |
+| `categoryId` | ❌ | ID kategorii |
 
-## 🔍 Get house by street and number
-GET /api/house/streetAndNumber/{street}/{number}
+<details>
+<summary>Przykłady requestów i odpowiedzi</summary>
 
----
-
-## 🔍 Get house by owner
-GET /api/house/owner/{ownerId}
-
----
-
-## ❌ Delete house
-DELETE /api/house/{id}
-
----
-
-# 💰 TRANSACTION API
-
-## ➕ Create transaction
-POST /api/transactions
-
-### Body:
+**POST** `/api/transactions`
 ```json
 {
   "amount": 100.50,
@@ -148,57 +134,18 @@ POST /api/transactions
 }
 ```
 
----
-
-## ✏️ Update transaction
-PATCH /api/transactions/{id}
-
-### Body:
+**PATCH** `/api/transactions/{id}`
 ```json
 {
   "transactionType": "EXPENSE",
   "date": "2026-04-26",
+  "amount": 200.00,
   "categoryId": 1,
-  "userId": 2,
-  "amount": 200.00
+  "userId": 2
 }
 ```
 
----
-
-## 🔎 Search transactions
-GET /api/transactions/search
-
-Query params:
-- userId (required)
-- minAmount
-- maxAmount
-- startDate (YYYY-MM-DD)
-- endDate (YYYY-MM-DD)
-- type (INCOME / EXPENSE)
-- categoryId
-
----
-
-## 📄 Get all transactions
-GET /api/transactions
-
----
-
-## 🔍 Get transaction by id
-GET /api/transactions/{id}
-
----
-
-## 🧾 Summary by house
-GET /api/transactions/house/{houseId}/summary
-
----
-
-## 👤 Summary by user
-GET /api/transactions/user/{userId}/summary
-
-### Response:
+**GET** `/api/transactions/user/{userId}/summary` — odpowiedź
 ```json
 {
   "totalIncome": 5000,
@@ -206,110 +153,27 @@ GET /api/transactions/user/{userId}/summary
   "balance": 3000
 }
 ```
+</details>
 
 ---
 
-## ❌ Delete transaction
-DELETE /api/transactions/{id}
+### Categories `/api/category`
+
+| Method | Endpoint | Opis |
+|--------|----------|------|
+| `GET` | `/api/category` | Lista wszystkich kategorii |
+| `GET` | `/api/category/{id}` | Kategoria po ID |
+| `POST` | `/api/category/name/{name}` | Utwórz kategorię |
+| `DELETE` | `/api/category/{id}` | Usuń kategorię |
 
 ---
 
-# 🏷 CATEGORY API
+## Status Codes
 
-## 📄 Get all categories
-GET /api/category
-
----
-
-## 🔍 Get category by id
-GET /api/category/{id}
-
----
-
-## ➕ Create category
-POST /api/category/name/{name}
-
----
-
-## ❌ Delete category
-DELETE /api/category/{id}
-
----
-
-# 📦 DTO STRUCTURE
-
-## CreateUserRequest
-```json
-{
-  "name": "string",
-  "surname": "string"
-}
-```
-
-## UpdateUserRequest
-```json
-{
-  "name": "string",
-  "surname": "string",
-  "houseId": "number"
-}
-```
-
-## HouseOperationRequest
-```json
-{
-  "userId": "number",
-  "userToModifyId": "number",
-  "houseId": "number"
-}
-```
-
-## CreateHouseRequest
-```json
-{
-  "street": "string",
-  "number": "string",
-  "owner_id": "number"
-}
-```
-
-## CreateTransactionRequest
-```json
-{
-  "amount": "number",
-  "date": "YYYY-MM-DD",
-  "transactionType": "INCOME | EXPENSE",
-  "categoryId": "number",
-  "userId": "number"
-}
-```
-
-## UpdateTransactionRequest
-```json
-{
-  "transactionType": "INCOME | EXPENSE",
-  "date": "YYYY-MM-DD",
-  "categoryId": "number",
-  "userId": "number",
-  "amount": "number"
-}
-```
-
----
-
-# 🧠 ENUMS
-
-TransactionType:
-- INCOME
-- EXPENSE
-
----
-
-# ⚠️ STATUS CODES
-
-- 200 OK
-- 201 CREATED
-- 204 NO CONTENT
-- 400 BAD REQUEST
-- 404 NOT FOUND
-```
+| Kod | Znaczenie |
+|-----|-----------|
+| `200 OK` | Sukces |
+| `201 Created` | Zasób utworzony |
+| `204 No Content` | Zasób usunięty |
+| `400 Bad Request` | Błędne dane wejściowe |
+| `404 Not Found` | Zasób nie istnieje |

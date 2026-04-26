@@ -1,6 +1,6 @@
 # Personal Finance API
 
-REST API do zarządzania finansami osobistymi — użytkownicy, domy, kategorie i transakcje.
+REST API for managing personal finances — users, houses, categories and transactions.
 
 ## Tech Stack
 
@@ -9,14 +9,14 @@ REST API do zarządzania finansami osobistymi — użytkownicy, domy, kategorie 
 - Flyway
 - Docker
 
-## Uruchomienie
+## Getting Started
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-Aplikacja dostępna pod: `http://localhost:8080`
+App available at: `http://localhost:8080`
 
 ---
 
@@ -24,21 +24,21 @@ Aplikacja dostępna pod: `http://localhost:8080`
 
 ### Users `/api/user`
 
-| Method | Endpoint | Opis |
-|--------|----------|------|
-| `GET` | `/api/user` | Lista wszystkich użytkowników |
-| `GET` | `/api/user/{id}` | Użytkownik po ID |
-| `GET` | `/api/user/name/{name}` | Użytkownik po imieniu |
-| `GET` | `/api/user/surname/{surname}` | Użytkownik po nazwisku |
-| `GET` | `/api/user/house/{houseId}` | Użytkownicy przypisani do domu |
-| `POST` | `/api/user` | Utwórz użytkownika |
-| `POST` | `/api/user/assign` | Przypisz użytkownika do domu |
-| `POST` | `/api/user/remove` | Usuń użytkownika z domu |
-| `PATCH` | `/api/user/{id}` | Zaktualizuj użytkownika |
-| `DELETE` | `/api/user/{id}` | Usuń użytkownika |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/user` | Get all users |
+| `GET` | `/api/user/{id}` | Get user by ID |
+| `GET` | `/api/user/name/{name}` | Get user by name |
+| `GET` | `/api/user/surname/{surname}` | Get user by surname |
+| `GET` | `/api/user/house/{houseId}` | Get users assigned to a house |
+| `POST` | `/api/user` | Create user |
+| `POST` | `/api/user/assign` | Assign user to a house |
+| `POST` | `/api/user/remove` | Remove user from a house |
+| `PATCH` | `/api/user/{id}` | Update user |
+| `DELETE` | `/api/user/{id}` | Delete user |
 
 <details>
-<summary>Przykłady requestów</summary>
+<summary>Request examples</summary>
 
 **POST** `/api/user`
 ```json
@@ -57,7 +57,7 @@ Aplikacja dostępna pod: `http://localhost:8080`
 }
 ```
 
-**POST** `/api/user/assign` i `/api/user/remove`
+**POST** `/api/user/assign` and `/api/user/remove`
 ```json
 {
   "userId": 1,
@@ -71,22 +71,22 @@ Aplikacja dostępna pod: `http://localhost:8080`
 
 ### Houses `/api/house`
 
-| Method | Endpoint | Opis |
-|--------|----------|------|
-| `GET` | `/api/house/{id}` | Dom po ID |
-| `GET` | `/api/house/street/{street}` | Domy po ulicy |
-| `GET` | `/api/house/streetAndNumber/{street}/{number}` | Dom po ulicy i numerze |
-| `GET` | `/api/house/owner/{ownerId}` | Dom po właścicielu |
-| `POST` | `/api/house` | Utwórz dom |
-| `DELETE` | `/api/house/{id}` | Usuń dom |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/house/{id}` | Get house by ID |
+| `GET` | `/api/house/street/{street}` | Get houses by street |
+| `GET` | `/api/house/streetAndNumber/{street}/{number}` | Get house by street and number |
+| `GET` | `/api/house/owner/{ownerId}` | Get house by owner |
+| `POST` | `/api/house` | Create house |
+| `DELETE` | `/api/house/{id}` | Delete house |
 
 <details>
-<summary>Przykłady requestów</summary>
+<summary>Request examples</summary>
 
 **POST** `/api/house`
 ```json
 {
-  "street": "Dębowa",
+  "street": "Oak Street",
   "number": "5B",
   "owner_id": 1
 }
@@ -97,31 +97,31 @@ Aplikacja dostępna pod: `http://localhost:8080`
 
 ### Transactions `/api/transactions`
 
-| Method | Endpoint | Opis |
-|--------|----------|------|
-| `GET` | `/api/transactions` | Lista wszystkich transakcji |
-| `GET` | `/api/transactions/{id}` | Transakcja po ID |
-| `GET` | `/api/transactions/search` | Wyszukaj transakcje (filtry) |
-| `GET` | `/api/transactions/user/{userId}/summary` | Podsumowanie użytkownika |
-| `GET` | `/api/transactions/house/{houseId}/summary` | Podsumowanie domu |
-| `POST` | `/api/transactions` | Utwórz transakcję |
-| `PATCH` | `/api/transactions/{id}` | Zaktualizuj transakcję |
-| `DELETE` | `/api/transactions/{id}` | Usuń transakcję |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/transactions` | Get all transactions |
+| `GET` | `/api/transactions/{id}` | Get transaction by ID |
+| `GET` | `/api/transactions/search` | Search transactions (filters) |
+| `GET` | `/api/transactions/user/{userId}/summary` | Get user summary |
+| `GET` | `/api/transactions/house/{houseId}/summary` | Get house summary |
+| `POST` | `/api/transactions` | Create transaction |
+| `PATCH` | `/api/transactions/{id}` | Update transaction |
+| `DELETE` | `/api/transactions/{id}` | Delete transaction |
 
-#### GET `/api/transactions/search` — parametry
+#### GET `/api/transactions/search` — query params
 
-| Parametr | Wymagany | Opis |
-|----------|----------|------|
-| `userId` | ✅ | ID użytkownika |
-| `minAmount` | ❌ | Minimalna kwota |
-| `maxAmount` | ❌ | Maksymalna kwota |
-| `startDate` | ❌ | Data od (YYYY-MM-DD) |
-| `endDate` | ❌ | Data do (YYYY-MM-DD) |
-| `type` | ❌ | `INCOME` lub `EXPENSE` |
-| `categoryId` | ❌ | ID kategorii |
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `userId` | ✅ | User ID |
+| `minAmount` | ❌ | Minimum amount |
+| `maxAmount` | ❌ | Maximum amount |
+| `startDate` | ❌ | Start date (YYYY-MM-DD) |
+| `endDate` | ❌ | End date (YYYY-MM-DD) |
+| `type` | ❌ | `INCOME` or `EXPENSE` |
+| `categoryId` | ❌ | Category ID |
 
 <details>
-<summary>Przykłady requestów i odpowiedzi</summary>
+<summary>Request and response examples</summary>
 
 **POST** `/api/transactions`
 ```json
@@ -145,7 +145,7 @@ Aplikacja dostępna pod: `http://localhost:8080`
 }
 ```
 
-**GET** `/api/transactions/user/{userId}/summary` — odpowiedź
+**GET** `/api/transactions/user/{userId}/summary` — response
 ```json
 {
   "totalIncome": 5000,
@@ -159,21 +159,21 @@ Aplikacja dostępna pod: `http://localhost:8080`
 
 ### Categories `/api/category`
 
-| Method | Endpoint | Opis |
-|--------|----------|------|
-| `GET` | `/api/category` | Lista wszystkich kategorii |
-| `GET` | `/api/category/{id}` | Kategoria po ID |
-| `POST` | `/api/category/name/{name}` | Utwórz kategorię |
-| `DELETE` | `/api/category/{id}` | Usuń kategorię |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/category` | Get all categories |
+| `GET` | `/api/category/{id}` | Get category by ID |
+| `POST` | `/api/category/name/{name}` | Create category |
+| `DELETE` | `/api/category/{id}` | Delete category |
 
 ---
 
 ## Status Codes
 
-| Kod | Znaczenie |
-|-----|-----------|
-| `200 OK` | Sukces |
-| `201 Created` | Zasób utworzony |
-| `204 No Content` | Zasób usunięty |
-| `400 Bad Request` | Błędne dane wejściowe |
-| `404 Not Found` | Zasób nie istnieje |
+| Code | Meaning |
+|------|---------|
+| `200 OK` | Success |
+| `201 Created` | Resource created |
+| `204 No Content` | Resource deleted |
+| `400 Bad Request` | Invalid input |
+| `404 Not Found` | Resource not found |

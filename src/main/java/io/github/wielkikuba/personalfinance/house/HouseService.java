@@ -28,14 +28,18 @@ public class HouseService {
     }
 
     @Transactional
-    public void deleteHouse(Long id) {
-        House house = houseRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("House " + id + " does not exist"));
-        try {
-            houseRepository.delete(house);
-            houseRepository.flush();
-        } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("House cannot be deleted due to existing constraints.");
+    public void deleteHouse(Long houseId,Long sessionUserId) {
+        House house = houseRepository.findById(houseId)
+                .orElseThrow(() -> new NoSuchElementException("House " + houseId + " does not exist"));
+        if(house.getOwner().getId().equals(sessionUserId)){
+            try {
+                houseRepository.delete(house);
+                houseRepository.flush();
+            } catch (DataIntegrityViolationException e) {
+                throw new RuntimeException("House cannot be deleted due to existing constraints.");
+            }
+        }else{
+            throw new SecurityException("Permission denied");
         }
     }
 

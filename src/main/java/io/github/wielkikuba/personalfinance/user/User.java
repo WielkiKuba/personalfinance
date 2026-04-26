@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.wielkikuba.personalfinance.house.House;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "user")
@@ -28,5 +30,6 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties("owner")
     @JoinColumn(name = "house")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private House house;
 }

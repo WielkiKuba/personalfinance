@@ -40,24 +40,31 @@ public class UserService {
     }
 
     @Transactional
-    public User modifyHouseAssignment(Long userSessionId,Long houseId,Long userToModifyId,boolean isAdding){
+    public User modifyHouseAssignment(Long userSessionId, Long houseId, Long userToModifyId, boolean isAdding) {
         House house = houseService.getHouseById(houseId);
         User userSession = getUserById(userSessionId);
-        User userToAdd = getUserById(userToModifyId);
-        if(userSession.getId().equals(house.getOwner().getId())){
-            if(isAdding){
-                if(userToAdd.getHouse()==null){
-                    userToAdd.setHouse(house);
-                }else{
-                    throw new SecurityException("No permissions. User already is on another house");
-                }
-            }else{
-                userToAdd.setHouse(null);
-            }
-            return userRepository.save(userToAdd);
-        }else{
-            throw new SecurityException("No permissions. Only the homeowner can add household members.");
+        User userToModify = getUserById(userToModifyId);
+        boolean isOwner = userSession.getId().equals(house.getOwner().getId());
+        if (isOwner && userToModifyId.equals(house.getOwner().getId()) && !isAdding) {
+            throw new RuntimeException("Owner cannot remove yourself from house");
         }
+        if (isOwner) {
+            if (isAdding) {
+                if (userToModify.getHouse() == null) {
+                    userToModify.setHouse(house);
+                } else {
+                    throw new SecurityException("User already belongs to another house");
+                }
+            } else {
+                userToModify.setHouse(null);
+            }
+            return userRepository.save(userToModify);
+        }
+        if (userSessionId.equals(userToModifyId) && !isAdding) {
+            userToModify.setHouse(null);
+            return userRepository.save(userToModify);
+        }
+        throw new SecurityException("No permissions. Only the homeowner can manage household members.");
     }
 
     @Transactional

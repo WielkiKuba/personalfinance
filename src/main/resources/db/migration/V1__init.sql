@@ -34,7 +34,7 @@ ALTER TABLE house
     ADD CONSTRAINT fk_house_owner FOREIGN KEY (owner) REFERENCES user (id);
 
 ALTER TABLE user
-    ADD CONSTRAINT fk_user_house FOREIGN KEY (house) REFERENCES house (id);
+    ADD CONSTRAINT fk_user_house FOREIGN KEY (house) REFERENCES house (id) ON DELETE SET NULL;
 
 ALTER TABLE transaction
     ADD CONSTRAINT fk_transaction_category FOREIGN KEY (category_id) REFERENCES category (id),

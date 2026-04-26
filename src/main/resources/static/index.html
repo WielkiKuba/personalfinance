@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Moje Finanse</title>
+    <style>
+        :root {
+            --primary: #2b8a3e;
+            --accent: #40c057;
+            --bg: #f4fce3;
+            --card-bg: #ffffff;
+            --danger: #fa5252;
+            --success: #12b886;
+            --text-main: #343a40;
+            --text-muted: #868e96;
+            --border: #e9ecef;
+            --nav-height: 64px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+            font-size: 15px;
+        }
+
+        .hidden { display: none !important; }
+
+        .container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(43, 138, 62, 0.08);
+            width: 94%;
+            max-width: 1000px;
+            margin-top: 16px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1, h2, h3, h4 { color: var(--primary); margin-top: 0; }
+        h3 { font-size: 17px; }
+        h4 { font-size: 15px; }
+
+        .form-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+
+        input, select {
+            flex: 1; min-width: 0;
+            padding: 12px 14px; font-size: 15px;
+            border: 2px solid var(--border); border-radius: 12px;
+            background: #f8f9fa; outline: none; transition: 0.3s;
+            width: 100%; -webkit-appearance: none;
+        }
+        input:focus, select:focus { border-color: var(--accent); background: white; }
+
+        button { font-family: inherit; cursor: pointer; transition: 0.2s; border: none; -webkit-tap-highlight-color: transparent; }
+
+        .btn-primary {
+            background: var(--accent); color: white;
+            padding: 13px 20px; border-radius: 12px;
+            font-weight: bold; font-size: 15px;
+            box-shadow: 0 4px 12px rgba(64, 192, 87, 0.3);
+            width: 100%;
+        }
+        .btn-primary:active { background: var(--primary); transform: scale(0.98); }
+
+        .btn-danger {
+            background: #ffe3e3; color: var(--danger);
+            padding: 8px 14px; border-radius: 8px;
+            font-weight: bold; font-size: 13px; white-space: nowrap;
+        }
+        .btn-danger:active { background: var(--danger); color: white; }
+
+        .btn-danger-full {
+            background: #ffe3e3; color: var(--danger);
+            padding: 13px 20px; border-radius: 12px;
+            font-weight: bold; font-size: 15px;
+            width: 100%; border: 2px solid #ffc9c9;
+        }
+        .btn-danger-full:active { background: var(--danger); color: white; }
+
+        .btn-outline {
+            background: white; border: 2px solid var(--border);
+            color: var(--text-main); padding: 12px 16px;
+            border-radius: 12px; font-weight: bold; width: 100%;
+        }
+        .btn-outline:active { border-color: var(--accent); color: var(--primary); }
+
+        #login-screen { max-width: 420px; margin-top: 60px; text-align: center; padding: 28px 22px; }
+        #login-screen h1 { font-size: 2rem; }
+
+        .top-bar {
+            background: white; color: var(--primary); width: 100%;
+            padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100;
+        }
+        .top-bar h2 { margin: 0; font-size: 17px; }
+        .top-bar .btn-danger { padding: 7px 14px; }
+
+        .navbar {
+            display: flex; width: 100%; background: white;
+            border-top: 1px solid var(--border);
+            position: fixed; bottom: 0; left: 0; z-index: 100;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.06);
+        }
+        .nav-tab {
+            flex: 1; background: white; color: var(--text-muted); border: none;
+            padding: 10px 4px 8px; font-size: 11px; cursor: pointer; font-weight: bold;
+            display: flex; flex-direction: column; align-items: center; gap: 3px; transition: 0.2s;
+        }
+        .nav-tab .nav-icon { font-size: 22px; line-height: 1; }
+        .nav-tab.active { color: var(--primary); background: #f0fdf4; }
+
+        #app-screen {
+            width: 100%; display: flex; flex-direction: column; align-items: center;
+            padding-bottom: calc(var(--nav-height) + 16px);
+        }
+
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -4px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 6px; min-width: 320px; }
+        th { text-align: left; padding: 8px 12px; color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
+        td { padding: 12px; background: white; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 14px; }
+        td:first-child { border-left: 1px solid var(--border); border-radius: 10px 0 0 10px; }
+        td:last-child { border-right: 1px solid var(--border); border-radius: 0 10px 10px 0; }
+
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; display: inline-block; white-space: nowrap; }
+        .badge.income { background-color: #e3fafc; color: #0c8599; }
+        .badge.expense { background-color: #fff5f5; color: #e03131; }
+
+        .summary-box { background: #f8f9fa; border: 2px dashed var(--border); border-radius: 14px; padding: 16px; margin-bottom: 20px; }
+        .summary-cards { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+
+        .card {
+            flex: 0 0 auto; width: calc(33% - 7px); min-width: 100px;
+            background: white; padding: 16px 10px; border-radius: 16px; text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .card h3 { color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .card p { margin: 0; font-size: 16px; font-weight: 800; }
+
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-primary { color: var(--primary); }
+
+        .danger-zone {
+            margin-top: 24px; padding: 16px;
+            border: 2px dashed #ffc9c9; border-radius: 14px; background: #fff5f5;
+        }
+        .danger-zone h4 { color: var(--danger); margin-bottom: 8px; font-size: 14px; }
+        .danger-zone p { color: var(--text-muted); font-size: 13px; margin: 0 0 12px 0; }
+
+        @media (min-width: 640px) {
+            body { font-size: 16px; }
+
+            .container { padding: 36px 40px; border-radius: 24px; max-width: 1100px; width: 90%; margin-top: 24px; margin-bottom: 28px; }
+
+            h3 { font-size: 20px; }
+            h4 { font-size: 17px; }
+
+            input, select { padding: 14px 18px; font-size: 16px; }
+
+            .navbar { position: static; border-top: none; box-shadow: none; background: transparent; justify-content: center; gap: 12px; margin-top: 24px; width: auto; }
+            .nav-tab { flex: 0; flex-direction: row; gap: 8px; padding: 14px 28px; border-radius: 16px; font-size: 16px; border: 2px solid transparent; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
+            .nav-tab .nav-icon { font-size: 20px; }
+            .nav-tab.active { background: #eefdf3; border-color: var(--accent); }
+
+            #app-screen { padding-bottom: 0; }
+
+            .top-bar { padding: 16px 32px; }
+            .top-bar h2 { font-size: 20px; }
+            .top-bar .btn-danger { padding: 10px 20px; font-size: 15px; }
+
+            .btn-primary { width: auto; padding: 14px 28px; font-size: 16px; border-radius: 14px; }
+            .btn-outline { width: auto; padding: 14px 24px; font-size: 16px; border-radius: 14px; }
+            .btn-danger { padding: 10px 18px; font-size: 14px; }
+            .btn-danger-full { width: auto; padding: 14px 28px; font-size: 16px; border-radius: 14px; }
+
+            .form-row { gap: 14px; margin-bottom: 20px; }
+            .form-row input, .form-row select { width: auto; }
+
+            .card { width: auto; flex: 1; min-width: 180px; padding: 28px 20px; border-radius: 20px; }
+            .card p { font-size: 28px; }
+            .card h3 { font-size: 13px; }
+
+            .summary-cards { flex-wrap: wrap; overflow-x: visible; gap: 16px; margin-bottom: 28px; }
+
+            table { border-spacing: 0 8px; }
+            th { padding: 10px 16px; font-size: 12px; }
+            td { padding: 16px; font-size: 15px; }
+
+            .summary-box { padding: 24px; border-radius: 16px; }
+            .danger-zone { padding: 20px; margin-top: 32px; }
+            .danger-zone h4 { font-size: 16px; }
+            .danger-zone p { font-size: 14px; }
+
+            #login-screen { max-width: 480px; padding: 40px 36px; margin-top: 80px; }
+        }
+
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen" class="container">
+    <h1>👋 Witaj!</h1>
+    <p style="color: var(--text-muted); margin-bottom: 28px; font-size: 15px;">Zarządzaj swoim budżetem i domem</p>
+    <select id="user-login-select" style="margin-bottom: 12px;"></select>
+    <button class="btn-primary" onclick="login()">Zaloguj się</button>
+    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">Nowy użytkownik?</p>
+        <div class="form-row" style="gap: 8px;">
+            <input type="text" id="newUserName" placeholder="Imię">
+            <input type="text" id="newUserSurname" placeholder="Nazwisko">
+        </div>
+        <button class="btn-outline" onclick="createUser()">Stwórz profil</button>
+    </div>
+</div>
+
+<div id="app-screen" class="hidden">
+    <div class="top-bar">
+        <h2>🍃 <span id="current-user-name">Użytkownik</span></h2>
+        <button class="btn-danger" onclick="logout()">Wyloguj</button>
+    </div>
+
+    <nav class="navbar">
+        <button class="nav-tab active" onclick="switchTab('tab-wallet', this)"><span class="nav-icon">💸</span>Portfel</button>
+        <button class="nav-tab" onclick="switchTab('tab-house', this)"><span class="nav-icon">🏠</span>Dom</button>
+        <button class="nav-tab" onclick="switchTab('tab-categories', this)"><span class="nav-icon">🏷️</span>Kategorie</button>
+    </nav>
+
+    <!-- PORTFEL -->
+    <div id="tab-wallet" class="container">
+        <h3>Twoje finanse 🗓️</h3>
+        <div class="summary-cards">
+            <div class="card"><h3>Wpływy</h3><p class="text-success" id="user-income-total">0.00</p></div>
+            <div class="card"><h3>Wydatki</h3><p class="text-danger" id="user-expense-total">0.00</p></div>
+            <div class="card"><h3>Bilans</h3><p class="text-primary" id="user-balance-total">0.00</p></div>
+        </div>
+
+        <h3>Nowa operacja ✨</h3>
+        <div class="form-row">
+            <input type="number" id="tAmount" step="0.01" placeholder="Kwota">
+            <input type="date" id="tDate">
+        </div>
+        <div class="form-row">
+            <select id="tType">
+                <option value="EXPENSE">Wydatek (-)</option>
+                <option value="INCOME">Przychód (+)</option>
+            </select>
+            <select id="tCategory"><option value="">Kategoria...</option></select>
+        </div>
+        <button class="btn-primary" onclick="addTransaction()">Zapisz transakcję</button>
+
+        <div class="summary-box" style="margin-top: 20px;">
+            <h4 style="margin: 0 0 12px 0;">🔍 Filtruj</h4>
+            <div class="form-row">
+                <input type="date" id="fStartDate">
+                <input type="date" id="fEndDate">
+            </div>
+            <div class="form-row">
+                <input type="number" id="fMin" placeholder="Kwota od">
+                <input type="number" id="fMax" placeholder="Kwota do">
+                <select id="fType">
+                    <option value="">Każdy typ</option>
+                    <option value="EXPENSE">Wydatki</option>
+                    <option value="INCOME">Przychody</option>
+                </select>
+            </div>
+            <div class="form-row" style="margin-bottom: 0;">
+                <button class="btn-primary" onclick="loadTransactions()">Szukaj</button>
+                <button class="btn-outline" onclick="resetFilters()">Wyczyść</button>
+            </div>
+        </div>
+
+        <h4 style="margin-bottom: 8px;">Historia</h4>
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>Data</th><th>Typ</th><th>Kwota</th><th>Kat.</th><th></th></tr></thead>
+                <tbody id="transactions-table"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- DOM -->
+    <div id="tab-house" class="container hidden">
+        <div id="no-house-view">
+            <h3>Brak domu 🏠</h3>
+            <p style="color: var(--text-muted); font-size: 14px;">Zostań właścicielem nowej nieruchomości!</p>
+            <div class="form-row">
+                <input type="text" id="hStreet" placeholder="Ulica">
+                <input type="text" id="hNumber" placeholder="Numer">
+            </div>
+            <button class="btn-primary" onclick="createHouse()">Załóż Dom</button>
+        </div>
+
+        <div id="has-house-view" class="hidden">
+            <h3 id="house-address">Adres domu</h3>
+            <p style="margin-top: -8px; color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Właściciel: <strong id="house-owner-name"></strong></p>
+
+            <div class="summary-cards">
+                <div class="card"><h3>Przychody</h3><p class="text-success" id="house-income-total">0.00</p></div>
+                <div class="card"><h3>Wydatki</h3><p class="text-danger" id="house-expense-total">0.00</p></div>
+                <div class="card"><h3>Budżet</h3><p class="text-primary" id="house-balance-total">0.00</p></div>
+            </div>
+
+            <div class="summary-box" id="house-admin-panel">
+                <h4 style="margin-top: 0;">Zarządzaj domownikami</h4>
+                <div class="form-row" style="margin-bottom: 0;">
+                    <select id="house-user-select"><option value="">Wybierz użytkownika...</option></select>
+                    <button class="btn-primary" onclick="assignToHouse()">Dodaj</button>
+                </div>
+            </div>
+
+            <h4>Domownicy</h4>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>ID</th><th>Imię i Nazwisko</th><th></th></tr></thead>
+                    <tbody id="house-members-table"></tbody>
+                </table>
+            </div>
+
+            <div class="danger-zone" id="house-danger-zone">
+                <h4>⚠️ Strefa niebezpieczna</h4>
+                <p>Usunięcie domu jest nieodwracalne. Wszyscy domownicy zostaną wypisani.</p>
+                <button class="btn-danger-full" onclick="deleteHouse()">🗑️ Usuń dom</button>
+            </div>
+
+            <div class="danger-zone" id="house-leave-zone">
+                <h4>🚪 Opuść dom</h4>
+                <p>Opuścisz ten dom. Możesz do niego wrócić jeśli właściciel Cię doda ponownie.</p>
+                <button class="btn-danger-full" onclick="leaveHouse()">Opuść dom</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KATEGORIE -->
+    <div id="tab-categories" class="container hidden">
+        <h3>Kategorie 🏷️</h3>
+        <div class="form-row">
+            <input type="text" id="cName" placeholder="Nazwa kategorii">
+            <button class="btn-primary" onclick="addCategory()">Dodaj</button>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>ID</th><th>Nazwa</th><th></th></tr></thead>
+                <tbody id="categories-table"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API = '/api';
+    let currentUser = null;
+    let currentHouseId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('tDate').valueAsDate = new Date();
+        fetchUsersForLogin();
+    });
+
+    async function apiCall(endpoint, method = 'GET', body = null) {
+        const options = { method, headers: {} };
+        if (body) { options.headers['Content-Type'] = 'application/json'; options.body = JSON.stringify(body); }
+        const res = await fetch(API + endpoint, options);
+        if (!res.ok) {
+            if (res.status === 403) throw new Error("Odmowa dostępu! Tylko właściciel może to zrobić.");
+            if (res.status === 409) throw new Error("Konflikt danych. Ten zasób jest w użyciu.");
+            throw new Error("Wystąpił błąd serwera.");
+        }
+        return res.status !== 204 ? await res.json() : null;
+    }
+
+    async function fetchUsersForLogin() {
+        try {
+            const users = await apiCall('/user');
+            const selLogin = document.getElementById('user-login-select');
+            const selHouse = document.getElementById('house-user-select');
+            selLogin.innerHTML = '<option value="">-- Wybierz swój profil --</option>';
+            selHouse.innerHTML = '<option value="">-- Wybierz kogoś do dodania --</option>';
+            users.forEach(u => {
+                selLogin.innerHTML += `<option value="${u.id}">${u.name} ${u.surname}</option>`;
+                selHouse.innerHTML += `<option value="${u.id}">${u.name} ${u.surname}</option>`;
+            });
+        } catch (e) { alert("Błąd połączenia z backendem!"); }
+    }
+
+    async function createUser() {
+        const name = document.getElementById('newUserName').value;
+        const surname = document.getElementById('newUserSurname').value;
+        if(!name || !surname) return alert("Wypełnij imię i nazwisko!");
+        try { await apiCall('/user', 'POST', { name, surname }); alert("Utworzono!"); fetchUsersForLogin(); }
+        catch(e) { alert(e.message); }
+    }
+
+    async function login() {
+        const userId = document.getElementById('user-login-select').value;
+        if(!userId) return alert("Wybierz użytkownika!");
+        currentUser = await apiCall(`/user/${userId}`);
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
+        document.getElementById('current-user-name').innerText = `${currentUser.name} ${currentUser.surname}`;
+        initApp();
+    }
+
+    function logout() {
+        currentUser = null; currentHouseId = null;
+        document.getElementById('app-screen').classList.add('hidden');
+        document.getElementById('login-screen').classList.remove('hidden');
+        fetchUsersForLogin();
+    }
+
+    function initApp() { loadCategories(); loadTransactions(); loadUserSummary(); checkHouseStatus(); }
+
+    async function loadUserSummary() {
+        try {
+            const s = await apiCall(`/transactions/user/${currentUser.id}/summary`);
+            document.getElementById('user-income-total').innerText = s.totalIncome.toFixed(2);
+            document.getElementById('user-expense-total').innerText = s.totalOutcome.toFixed(2);
+            const el = document.getElementById('user-balance-total');
+            el.innerText = s.balance.toFixed(2);
+            el.style.color = s.balance >= 0 ? 'var(--success)' : 'var(--danger)';
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadTransactions() {
+        let url = `/transactions/search?userId=${currentUser.id}`;
+        const start = document.getElementById('fStartDate').value.trim();
+        const end = document.getElementById('fEndDate').value.trim();
+        const min = document.getElementById('fMin').value.trim();
+        const max = document.getElementById('fMax').value.trim();
+        const type = document.getElementById('fType').value.trim();
+        if(start) url += `&startDate=${start}`;
+        if(end) url += `&endDate=${end}`;
+        if(min) url += `&minAmount=${min}`;
+        if(max) url += `&maxAmount=${max}`;
+        if(type) url += `&type=${type}`;
+        try {
+            const transactions = await apiCall(url);
+            const tbody = document.getElementById('transactions-table');
+            tbody.innerHTML = '';
+            if(transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak transakcji.</td></tr>';
+                return;
+            }
+            transactions.forEach(t => {
+                const isIncome = t.transactionType === 'INCOME';
+                const badge = isIncome ? '<span class="badge income">+</span>' : '<span class="badge expense">-</span>';
+                const color = isIncome ? 'var(--success)' : 'var(--danger)';
+                const sign = isIncome ? '+' : '-';
+                tbody.innerHTML += `<tr>
+                    <td style="color:var(--text-muted);font-size:12px;">${t.date}</td>
+                    <td>${badge}</td>
+                    <td style="font-weight:800;font-size:14px;color:${color};white-space:nowrap;">${sign}${t.amount.toFixed(2)}</td>
+                    <td style="font-size:12px;">${t.category.name}</td>
+                    <td><button class="btn-danger" onclick="deleteTransaction(${t.id})">✕</button></td>
+                </tr>`;
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    function resetFilters() {
+        ['fStartDate','fEndDate','fMin','fMax'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('fType').value = '';
+        loadTransactions();
+    }
+
+    async function addTransaction() {
+        const payload = {
+            amount: parseFloat(document.getElementById('tAmount').value),
+            date: document.getElementById('tDate').value,
+            transactionType: document.getElementById('tType').value,
+            categoryId: parseInt(document.getElementById('tCategory').value),
+            userId: currentUser.id
+        };
+        if(!payload.amount || !payload.categoryId) return alert("Wypełnij kwotę i kategorię!");
+        try {
+            await apiCall('/transactions', 'POST', payload);
+            document.getElementById('tAmount').value = '';
+            loadTransactions(); loadUserSummary();
+            if(currentHouseId) loadHouseSummary(currentHouseId);
+        } catch(e) { alert(e.message); }
+    }
+
+    async function deleteTransaction(id) {
+        if(!confirm('Usunąć?')) return;
+        await apiCall(`/transactions/${id}`, 'DELETE');
+        loadTransactions(); loadUserSummary();
+        if(currentHouseId) loadHouseSummary(currentHouseId);
+    }
+
+    async function loadCategories() {
+        const categories = await apiCall('/category');
+        const tbody = document.getElementById('categories-table');
+        const select = document.getElementById('tCategory');
+        tbody.innerHTML = '';
+        select.innerHTML = '<option value="">Wybierz kategorię...</option>';
+        categories.forEach(c => {
+            select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+            tbody.innerHTML += `<tr>
+                <td style="font-size:13px;">${c.id}</td>
+                <td><b>${c.name}</b></td>
+                <td><button class="btn-danger" onclick="deleteCategory(${c.id})">✕</button></td>
+            </tr>`;
+        });
+    }
+
+    async function addCategory() {
+        const name = document.getElementById('cName').value.trim();
+        if(!name) return;
+        try { await apiCall(`/category/name/${encodeURIComponent(name)}`, 'POST'); document.getElementById('cName').value = ''; loadCategories(); }
+        catch(e) { alert(e.message); }
+    }
+
+    async function deleteCategory(id) {
+        if(!confirm('Usunąć kategorię?')) return;
+        try { await apiCall(`/category/${id}`, 'DELETE'); loadCategories(); }
+        catch(e) { alert(e.message); }
+    }
+
+    async function checkHouseStatus() {
+        currentUser = await apiCall(`/user/${currentUser.id}`);
+        if (currentUser.house === null) {
+            currentHouseId = null;
+            document.getElementById('no-house-view').classList.remove('hidden');
+            document.getElementById('has-house-view').classList.add('hidden');
+        } else {
+            currentHouseId = currentUser.house.id;
+            document.getElementById('no-house-view').classList.add('hidden');
+            document.getElementById('has-house-view').classList.remove('hidden');
+            loadHouseDetails(currentHouseId);
+            loadHouseSummary(currentHouseId);
+        }
+    }
+
+    async function createHouse() {
+        const payload = { street: document.getElementById('hStreet').value, number: document.getElementById('hNumber').value, owner_id: currentUser.id };
+        if(!payload.street || !payload.number) return alert("Podaj ulicę i numer!");
+        try { await apiCall('/house', 'POST', payload); checkHouseStatus(); }
+        catch(e) { alert(e.message); }
+    }
+
+    async function deleteHouse() {
+        if(!confirm('Czy na pewno chcesz usunąć dom? Ta operacja jest nieodwracalna.')) return;
+        try {
+            await apiCall(`/house/${currentHouseId}/owner/${currentUser.id}`, 'DELETE');
+            currentHouseId = null;
+            currentUser.house = null;
+            document.getElementById('no-house-view').classList.remove('hidden');
+            document.getElementById('has-house-view').classList.add('hidden');
+        } catch(e) { alert(e.message); }
+    }
+
+    async function leaveHouse() {
+        if(!confirm("Czy na pewno chcesz opuścić dom?")) return;
+        try {
+            await apiCall("/user/remove", "POST", { userId: currentUser.id, houseId: currentHouseId, userToModifyId: currentUser.id });
+            currentHouseId = null;
+            currentUser.house = null;
+            document.getElementById("no-house-view").classList.remove("hidden");
+            document.getElementById("has-house-view").classList.add("hidden");
+        } catch(e) { alert(e.message); }
+    }
+
+    async function loadHouseDetails(houseId) {
+        try {
+            const house = await apiCall(`/house/${houseId}`);
+            document.getElementById('house-address').innerText = `🏠 ${house.street} ${house.number}`;
+            document.getElementById('house-owner-name').innerText = `${house.owner.name} ${house.owner.surname}`;
+            const isOwner = house.owner.id === currentUser.id;
+            document.getElementById('house-admin-panel').classList.toggle('hidden', !isOwner);
+            document.getElementById('house-danger-zone').classList.toggle('hidden', !isOwner);
+            document.getElementById('house-leave-zone').classList.toggle('hidden', isOwner);
+
+            const members = await apiCall(`/user/house/${houseId}`);
+            const tbody = document.getElementById('house-members-table');
+            tbody.innerHTML = '';
+            members.forEach(m => {
+                const isMe = m.id === currentUser.id ? ' (Ty)' : '';
+                const crown = m.id === house.owner.id ? ' 👑' : '';
+                const actionBtn = (isOwner && m.id !== currentUser.id)
+                    ? `<button class="btn-danger" onclick="removeFromHouse(${m.id}, ${houseId})">✕</button>`
+                    : '-';
+                tbody.innerHTML += `<tr>
+                    <td style="font-size:12px;">${m.id}</td>
+                    <td><b>${m.name} ${m.surname}</b>${isMe}${crown}</td>
+                    <td>${actionBtn}</td>
+                </tr>`;
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadHouseSummary(houseId) {
+        try {
+            const transactions = await apiCall(`/transactions/house/${houseId}/summary`);
+            let income = 0, expense = 0;
+            transactions.forEach(t => t.transactionType === 'INCOME' ? income += t.amount : expense += t.amount);
+            const balance = income - expense;
+            document.getElementById('house-income-total').innerText = income.toFixed(2);
+            document.getElementById('house-expense-total').innerText = expense.toFixed(2);
+            const el = document.getElementById('house-balance-total');
+            el.innerText = balance.toFixed(2);
+            el.style.color = balance >= 0 ? 'var(--success)' : 'var(--danger)';
+        } catch(e) { console.error(e); }
+    }
+
+    async function assignToHouse() {
+        const userToAddId = document.getElementById('house-user-select').value;
+        if(!userToAddId) return;
+        try {
+            await apiCall('/user/assign', 'POST', { userId: currentUser.id, houseId: currentHouseId, userToModifyId: parseInt(userToAddId) });
+            loadHouseDetails(currentHouseId); loadHouseSummary(currentHouseId);
+        } catch(e) { alert(e.message); }
+    }
+
+    async function removeFromHouse(userToRemoveId, houseId) {
+        if(!confirm("Wyrzucić użytkownika z domu?")) return;
+        try {
+            await apiCall('/user/remove', 'POST', { userId: currentUser.id, houseId: houseId, userToModifyId: userToRemoveId });
+            loadHouseDetails(houseId); loadHouseSummary(houseId);
+        } catch(e) { alert(e.message); }
+    }
+
+    function switchTab(tabId, btn) {
+        ['tab-wallet', 'tab-house', 'tab-categories'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.remove('hidden');
+        btn.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>

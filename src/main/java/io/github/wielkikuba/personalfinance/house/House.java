@@ -26,6 +26,6 @@ public class House {
     private String number;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner",nullable = false)
+    @JoinColumn(name = "owner", nullable = false)
     private User owner;
 }

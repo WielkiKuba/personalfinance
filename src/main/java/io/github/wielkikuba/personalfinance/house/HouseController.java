@@ -24,9 +24,9 @@ public class HouseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(house);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHouseById(@PathVariable Long id){
-        houseService.deleteHouse(id);
+    @DeleteMapping("/{houseId}/owner/{userId}")
+    public ResponseEntity<Void> deleteHouseById(@PathVariable Long houseId,@PathVariable Long userId){
+        houseService.deleteHouse(houseId,userId);
         return ResponseEntity.noContent().build();
     }
 

@@ -1,7 +1,6 @@
 package io.github.wielkikuba.personalfinance.transaction;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.wielkikuba.personalfinance.category.Category;
 import io.github.wielkikuba.personalfinance.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,10 +34,9 @@ public class Transaction {
     @Column(name = "transaction_type",nullable = false)
     private TransactionType transactionType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category")
+    private TransactionCategory transactionCategory;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)

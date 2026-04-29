@@ -160,48 +160,35 @@
 
         @media (min-width: 640px) {
             body { font-size: 16px; }
-
             .container { padding: 36px 40px; border-radius: 24px; max-width: 1100px; width: 90%; margin-top: 24px; margin-bottom: 28px; }
-
             h3 { font-size: 20px; }
             h4 { font-size: 17px; }
-
             input, select { padding: 14px 18px; font-size: 16px; }
-
             .navbar { position: static; border-top: none; box-shadow: none; background: transparent; justify-content: center; gap: 12px; margin-top: 24px; width: auto; }
             .nav-tab { flex: 0; flex-direction: row; gap: 8px; padding: 14px 28px; border-radius: 16px; font-size: 16px; border: 2px solid transparent; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
             .nav-tab .nav-icon { font-size: 20px; }
             .nav-tab.active { background: #eefdf3; border-color: var(--accent); }
-
             #app-screen { padding-bottom: 0; }
-
             .top-bar { padding: 16px 32px; }
             .top-bar h2 { font-size: 20px; }
             .top-bar .btn-danger { padding: 10px 20px; font-size: 15px; }
-
             .btn-primary { width: auto; padding: 14px 28px; font-size: 16px; border-radius: 14px; }
             .btn-outline { width: auto; padding: 14px 24px; font-size: 16px; border-radius: 14px; }
             .btn-danger { padding: 10px 18px; font-size: 14px; }
             .btn-danger-full { width: auto; padding: 14px 28px; font-size: 16px; border-radius: 14px; }
-
             .form-row { gap: 14px; margin-bottom: 20px; }
             .form-row input, .form-row select { width: auto; }
-
             .card { width: auto; flex: 1; min-width: 180px; padding: 28px 20px; border-radius: 20px; }
             .card p { font-size: 28px; }
             .card h3 { font-size: 13px; }
-
             .summary-cards { flex-wrap: wrap; overflow-x: visible; gap: 16px; margin-bottom: 28px; }
-
             table { border-spacing: 0 8px; }
             th { padding: 10px 16px; font-size: 12px; }
             td { padding: 16px; font-size: 15px; }
-
             .summary-box { padding: 24px; border-radius: 16px; }
             .danger-zone { padding: 20px; margin-top: 32px; }
             .danger-zone h4 { font-size: 16px; }
             .danger-zone p { font-size: 14px; }
-
             #login-screen { max-width: 480px; padding: 40px 36px; margin-top: 80px; }
         }
 
@@ -234,7 +221,7 @@
     <nav class="navbar">
         <button class="nav-tab active" onclick="switchTab('tab-wallet', this)"><span class="nav-icon">💸</span>Portfel</button>
         <button class="nav-tab" onclick="switchTab('tab-house', this)"><span class="nav-icon">🏠</span>Dom</button>
-        <button class="nav-tab" onclick="switchTab('tab-categories', this)"><span class="nav-icon">🏷️</span>Kategorie</button>
+        <button class="nav-tab" onclick="switchTab('tab-invites', this)"><span class="nav-icon">📨</span>Zaproszenia</button>
     </nav>
 
     <!-- PORTFEL -->
@@ -256,7 +243,18 @@
                 <option value="EXPENSE">Wydatek (-)</option>
                 <option value="INCOME">Przychód (+)</option>
             </select>
-            <select id="tCategory"><option value="">Kategoria...</option></select>
+            <select id="tCategory">
+                <option value="">Wybierz kategorię...</option>
+                <option value="JEDZENIE">Jedzenie</option>
+                <option value="TRANSPORT">Transport</option>
+                <option value="MIESZKANIE">Mieszkanie</option>
+                <option value="ROZRYWKA">Rozrywka</option>
+                <option value="ZDROWIE">Zdrowie</option>
+                <option value="UBRANIA">Ubrania</option>
+                <option value="EDUKACJA">Edukacja</option>
+                <option value="OSZCZEDNOSCI">Oszczędności</option>
+                <option value="INNE">Inne</option>
+            </select>
         </div>
         <button class="btn-primary" onclick="addTransaction()">Zapisz transakcję</button>
 
@@ -284,7 +282,7 @@
         <h4 style="margin-bottom: 8px;">Historia</h4>
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>Data</th><th>Typ</th><th>Kwota</th><th>Kat.</th><th></th></tr></thead>
+                <thead><tr><th>Data</th><th>Typ</th><th>Kwota</th><th>Kategoria</th><th></th></tr></thead>
                 <tbody id="transactions-table"></tbody>
             </table>
         </div>
@@ -294,7 +292,7 @@
     <div id="tab-house" class="container hidden">
         <div id="no-house-view">
             <h3>Brak domu 🏠</h3>
-            <p style="color: var(--text-muted); font-size: 14px;">Zostań właścicielem nowej nieruchomości!</p>
+            <p style="color: var(--text-muted); font-size: 14px;">Zostań właścicielem nowej nieruchomości lub poczekaj na zaproszenie w sekcji "Zaproszenia"!</p>
             <div class="form-row">
                 <input type="text" id="hStreet" placeholder="Ulica">
                 <input type="text" id="hNumber" placeholder="Numer">
@@ -310,14 +308,6 @@
                 <div class="card"><h3>Przychody</h3><p class="text-success" id="house-income-total">0.00</p></div>
                 <div class="card"><h3>Wydatki</h3><p class="text-danger" id="house-expense-total">0.00</p></div>
                 <div class="card"><h3>Budżet</h3><p class="text-primary" id="house-balance-total">0.00</p></div>
-            </div>
-
-            <div class="summary-box" id="house-admin-panel">
-                <h4 style="margin-top: 0;">Zarządzaj domownikami</h4>
-                <div class="form-row" style="margin-bottom: 0;">
-                    <select id="house-user-select"><option value="">Wybierz użytkownika...</option></select>
-                    <button class="btn-primary" onclick="assignToHouse()">Dodaj</button>
-                </div>
             </div>
 
             <h4>Domownicy</h4>
@@ -336,24 +326,41 @@
 
             <div class="danger-zone" id="house-leave-zone">
                 <h4>🚪 Opuść dom</h4>
-                <p>Opuścisz ten dom. Możesz do niego wrócić jeśli właściciel Cię doda ponownie.</p>
+                <p>Opuścisz ten dom. Możesz do niego wrócić jeśli właściciel Cię zaprosi ponownie.</p>
                 <button class="btn-danger-full" onclick="leaveHouse()">Opuść dom</button>
             </div>
         </div>
     </div>
 
-    <!-- KATEGORIE -->
-    <div id="tab-categories" class="container hidden">
-        <h3>Kategorie 🏷️</h3>
-        <div class="form-row">
-            <input type="text" id="cName" placeholder="Nazwa kategorii">
-            <button class="btn-primary" onclick="addCategory()">Dodaj</button>
-        </div>
+    <!-- ZAPROSZENIA -->
+    <div id="tab-invites" class="container hidden">
+        <h3>Otrzymane zaproszenia 📥</h3>
+        <p style="color: var(--text-muted); font-size: 13px; margin-top: -10px;">Zaproszenia od innych właścicieli domów.</p>
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>ID</th><th>Nazwa</th><th></th></tr></thead>
-                <tbody id="categories-table"></tbody>
+                <thead><tr><th>Od kogo</th><th>Ulica (Dom)</th><th>Akcja</th></tr></thead>
+                <tbody id="received-invites-table"></tbody>
             </table>
+        </div>
+
+        <!-- Sekcja widoczna tylko dla właściciela domu -->
+        <div id="send-invite-section" class="hidden">
+            <div class="summary-box" style="margin-top: 32px; padding: 20px;">
+                <h3 style="margin-top: 0;">Wyślij zaproszenie 📤</h3>
+                <p style="color: var(--text-muted); font-size: 13px; margin-top: -10px;">Zaproś innych do swojego domu.</p>
+                <div class="form-row">
+                    <select id="invite-user-select"><option value="">Wybierz użytkownika...</option></select>
+                    <button class="btn-primary" style="width: auto;" onclick="sendInvite()">Zaproś</button>
+                </div>
+
+                <h4 style="margin-top: 20px;">Wysłane zaproszenia</h4>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>Do kogo</th><th>Status</th><th>Akcja</th></tr></thead>
+                        <tbody id="sent-invites-table"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -368,14 +375,18 @@
         fetchUsersForLogin();
     });
 
-    async function apiCall(endpoint, method = 'GET', body = null) {
-        const options = { method, headers: {} };
-        if (body) { options.headers['Content-Type'] = 'application/json'; options.body = JSON.stringify(body); }
+    async function apiCall(endpoint, method = 'GET', body = null, customHeaders = {}) {
+        const options = { method, headers: { ...customHeaders } };
+        if (body !== null) {
+            options.headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(body);
+        }
         const res = await fetch(API + endpoint, options);
         if (!res.ok) {
+            const errorMsg = `Błąd HTTP: ${res.status}`;
             if (res.status === 403) throw new Error("Odmowa dostępu! Tylko właściciel może to zrobić.");
-            if (res.status === 409) throw new Error("Konflikt danych. Ten zasób jest w użyciu.");
-            throw new Error("Wystąpił błąd serwera.");
+            if (res.status === 409) throw new Error("409_CONFLICT");
+            throw new Error(errorMsg);
         }
         return res.status !== 204 ? await res.json() : null;
     }
@@ -384,12 +395,9 @@
         try {
             const users = await apiCall('/user');
             const selLogin = document.getElementById('user-login-select');
-            const selHouse = document.getElementById('house-user-select');
             selLogin.innerHTML = '<option value="">-- Wybierz swój profil --</option>';
-            selHouse.innerHTML = '<option value="">-- Wybierz kogoś do dodania --</option>';
             users.forEach(u => {
                 selLogin.innerHTML += `<option value="${u.id}">${u.name} ${u.surname}</option>`;
-                selHouse.innerHTML += `<option value="${u.id}">${u.name} ${u.surname}</option>`;
             });
         } catch (e) { alert("Błąd połączenia z backendem!"); }
     }
@@ -416,20 +424,33 @@
         currentUser = null; currentHouseId = null;
         document.getElementById('app-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.remove('hidden');
+        switchTab('tab-wallet', document.querySelector('.nav-tab'));
         fetchUsersForLogin();
     }
 
-    function initApp() { loadCategories(); loadTransactions(); loadUserSummary(); checkHouseStatus(); }
+    function initApp() {
+        loadTransactions();
+        loadUserSummary();
+        checkHouseStatus();
+    }
+
+    /* === PORTFEL / TRANSAKCJE === */
 
     async function loadUserSummary() {
         try {
-            const s = await apiCall(`/transactions/user/${currentUser.id}/summary`);
+            const s = await apiCall(`/transactions/summary/user/${currentUser.id}`);
             document.getElementById('user-income-total').innerText = s.totalIncome.toFixed(2);
             document.getElementById('user-expense-total').innerText = s.totalOutcome.toFixed(2);
             const el = document.getElementById('user-balance-total');
             el.innerText = s.balance.toFixed(2);
             el.style.color = s.balance >= 0 ? 'var(--success)' : 'var(--danger)';
-        } catch(e) { console.error(e); }
+        } catch(e) {
+            console.warn("Brak transakcji lub błąd pobierania podsumowania usera.");
+            document.getElementById('user-income-total').innerText = '0.00';
+            document.getElementById('user-expense-total').innerText = '0.00';
+            document.getElementById('user-balance-total').innerText = '0.00';
+            document.getElementById('user-balance-total').style.color = 'var(--text-main)';
+        }
     }
 
     async function loadTransactions() {
@@ -439,11 +460,13 @@
         const min = document.getElementById('fMin').value.trim();
         const max = document.getElementById('fMax').value.trim();
         const type = document.getElementById('fType').value.trim();
+
         if(start) url += `&startDate=${start}`;
         if(end) url += `&endDate=${end}`;
         if(min) url += `&minAmount=${min}`;
         if(max) url += `&maxAmount=${max}`;
         if(type) url += `&type=${type}`;
+
         try {
             const transactions = await apiCall(url);
             const tbody = document.getElementById('transactions-table');
@@ -457,11 +480,13 @@
                 const badge = isIncome ? '<span class="badge income">+</span>' : '<span class="badge expense">-</span>';
                 const color = isIncome ? 'var(--success)' : 'var(--danger)';
                 const sign = isIncome ? '+' : '-';
+                const categoryName = t.transactionCategory ? t.transactionCategory : '-';
+
                 tbody.innerHTML += `<tr>
                     <td style="color:var(--text-muted);font-size:12px;">${t.date}</td>
                     <td>${badge}</td>
                     <td style="font-weight:800;font-size:14px;color:${color};white-space:nowrap;">${sign}${t.amount.toFixed(2)}</td>
-                    <td style="font-size:12px;">${t.category.name}</td>
+                    <td style="font-size:12px;">${categoryName}</td>
                     <td><button class="btn-danger" onclick="deleteTransaction(${t.id})">✕</button></td>
                 </tr>`;
             });
@@ -479,10 +504,10 @@
             amount: parseFloat(document.getElementById('tAmount').value),
             date: document.getElementById('tDate').value,
             transactionType: document.getElementById('tType').value,
-            categoryId: parseInt(document.getElementById('tCategory').value),
+            transactionCategory: document.getElementById('tCategory').value,
             userId: currentUser.id
         };
-        if(!payload.amount || !payload.categoryId) return alert("Wypełnij kwotę i kategorię!");
+        if(!payload.amount || !payload.transactionCategory) return alert("Wypełnij kwotę i wybierz kategorię!");
         try {
             await apiCall('/transactions', 'POST', payload);
             document.getElementById('tAmount').value = '';
@@ -498,34 +523,8 @@
         if(currentHouseId) loadHouseSummary(currentHouseId);
     }
 
-    async function loadCategories() {
-        const categories = await apiCall('/category');
-        const tbody = document.getElementById('categories-table');
-        const select = document.getElementById('tCategory');
-        tbody.innerHTML = '';
-        select.innerHTML = '<option value="">Wybierz kategorię...</option>';
-        categories.forEach(c => {
-            select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-            tbody.innerHTML += `<tr>
-                <td style="font-size:13px;">${c.id}</td>
-                <td><b>${c.name}</b></td>
-                <td><button class="btn-danger" onclick="deleteCategory(${c.id})">✕</button></td>
-            </tr>`;
-        });
-    }
 
-    async function addCategory() {
-        const name = document.getElementById('cName').value.trim();
-        if(!name) return;
-        try { await apiCall(`/category/name/${encodeURIComponent(name)}`, 'POST'); document.getElementById('cName').value = ''; loadCategories(); }
-        catch(e) { alert(e.message); }
-    }
-
-    async function deleteCategory(id) {
-        if(!confirm('Usunąć kategorię?')) return;
-        try { await apiCall(`/category/${id}`, 'DELETE'); loadCategories(); }
-        catch(e) { alert(e.message); }
-    }
+    /* === DOM === */
 
     async function checkHouseStatus() {
         currentUser = await apiCall(`/user/${currentUser.id}`);
@@ -533,6 +532,7 @@
             currentHouseId = null;
             document.getElementById('no-house-view').classList.remove('hidden');
             document.getElementById('has-house-view').classList.add('hidden');
+            document.getElementById('send-invite-section').classList.add('hidden');
         } else {
             currentHouseId = currentUser.house.id;
             document.getElementById('no-house-view').classList.add('hidden');
@@ -540,6 +540,7 @@
             loadHouseDetails(currentHouseId);
             loadHouseSummary(currentHouseId);
         }
+        loadInvites(); // Odśwież zaproszenia za każdym razem gdy ładujemy dom
     }
 
     async function createHouse() {
@@ -552,11 +553,10 @@
     async function deleteHouse() {
         if(!confirm('Czy na pewno chcesz usunąć dom? Ta operacja jest nieodwracalna.')) return;
         try {
-            await apiCall(`/house/${currentHouseId}/owner/${currentUser.id}`, 'DELETE');
+            await apiCall(`/house/${currentHouseId}`, 'DELETE', null, { 'X-Session-User-Id': currentUser.id });
             currentHouseId = null;
             currentUser.house = null;
-            document.getElementById('no-house-view').classList.remove('hidden');
-            document.getElementById('has-house-view').classList.add('hidden');
+            checkHouseStatus();
         } catch(e) { alert(e.message); }
     }
 
@@ -566,8 +566,7 @@
             await apiCall("/user/remove", "POST", { userId: currentUser.id, houseId: currentHouseId, userToModifyId: currentUser.id });
             currentHouseId = null;
             currentUser.house = null;
-            document.getElementById("no-house-view").classList.remove("hidden");
-            document.getElementById("has-house-view").classList.add("hidden");
+            checkHouseStatus();
         } catch(e) { alert(e.message); }
     }
 
@@ -576,8 +575,8 @@
             const house = await apiCall(`/house/${houseId}`);
             document.getElementById('house-address').innerText = `🏠 ${house.street} ${house.number}`;
             document.getElementById('house-owner-name').innerText = `${house.owner.name} ${house.owner.surname}`;
+
             const isOwner = house.owner.id === currentUser.id;
-            document.getElementById('house-admin-panel').classList.toggle('hidden', !isOwner);
             document.getElementById('house-danger-zone').classList.toggle('hidden', !isOwner);
             document.getElementById('house-leave-zone').classList.toggle('hidden', isOwner);
 
@@ -588,7 +587,7 @@
                 const isMe = m.id === currentUser.id ? ' (Ty)' : '';
                 const crown = m.id === house.owner.id ? ' 👑' : '';
                 const actionBtn = (isOwner && m.id !== currentUser.id)
-                    ? `<button class="btn-danger" onclick="removeFromHouse(${m.id}, ${houseId})">✕</button>`
+                    ? `<button class="btn-danger" onclick="removeFromHouse(${m.id}, ${houseId})">Wyrzuć</button>`
                     : '-';
                 tbody.innerHTML += `<tr>
                     <td style="font-size:12px;">${m.id}</td>
@@ -601,7 +600,7 @@
 
     async function loadHouseSummary(houseId) {
         try {
-            const transactions = await apiCall(`/transactions/house/${houseId}/summary`);
+            const transactions = await apiCall(`/transactions/summary/house/${houseId}`);
             let income = 0, expense = 0;
             transactions.forEach(t => t.transactionType === 'INCOME' ? income += t.amount : expense += t.amount);
             const balance = income - expense;
@@ -613,15 +612,6 @@
         } catch(e) { console.error(e); }
     }
 
-    async function assignToHouse() {
-        const userToAddId = document.getElementById('house-user-select').value;
-        if(!userToAddId) return;
-        try {
-            await apiCall('/user/assign', 'POST', { userId: currentUser.id, houseId: currentHouseId, userToModifyId: parseInt(userToAddId) });
-            loadHouseDetails(currentHouseId); loadHouseSummary(currentHouseId);
-        } catch(e) { alert(e.message); }
-    }
-
     async function removeFromHouse(userToRemoveId, houseId) {
         if(!confirm("Wyrzucić użytkownika z domu?")) return;
         try {
@@ -630,8 +620,153 @@
         } catch(e) { alert(e.message); }
     }
 
+
+    /* === ZAPROSZENIA === */
+
+    async function loadInvites() {
+        if (!currentUser) return;
+
+        // Otrzymane zaproszenia
+        const rTbody = document.getElementById('received-invites-table');
+        try {
+            const received = await apiCall(`/invite/recipient/${currentUser.id}`);
+            rTbody.innerHTML = '';
+            if (!received || received.length === 0) {
+                rTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak otrzymanych zaproszeń.</td></tr>';
+            } else {
+                received.forEach(i => {
+                    const senderName = i.sender ? `${i.sender.name} ${i.sender.surname}` : 'Właściciel';
+
+                    // Odczytujemy dom od usera NADAWCY, bo sam obiekt Invite go nie posiada!
+                    const houseObj = (i.sender && i.sender.house) ? i.sender.house : null;
+                    const houseName = houseObj ? `${houseObj.street} ${houseObj.number}` : 'Dom';
+
+                    // Jeśli użytkownik z jakiegoś powodu odebrał zaproszenie do domu w którym już jest - ukrywamy je na froncie
+                    if (currentUser.house && houseObj && currentUser.house.id === houseObj.id) {
+                        return;
+                    }
+
+                    rTbody.innerHTML += `<tr>
+                        <td>${senderName}</td>
+                        <td style="font-size:12px;">${houseName}</td>
+                        <td>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                <button class="btn-primary" style="padding: 6px 10px; border-radius: 8px; font-size: 11px; flex: 1;" onclick="acceptInvite(${i.id})">Akceptuj</button>
+                                <button class="btn-danger" style="padding: 6px 10px; border-radius: 8px; font-size: 11px; flex: 1;" onclick="deleteInvite(${i.id}, 'received')">Odrzuć</button>
+                            </div>
+                        </td>
+                    </tr>`;
+                });
+
+                if(rTbody.innerHTML === '') {
+                     rTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak oczekujących zaproszeń.</td></tr>';
+                }
+            }
+        } catch (e) {
+            console.warn("Błąd lub oczekiwany brak zaproszeń (409/404 z backendu).");
+            rTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak otrzymanych zaproszeń.</td></tr>';
+        }
+
+        // Wysłane zaproszenia (Tylko jeśli currentUser jest właścicielem domu)
+        const isOwner = currentUser.house && currentUser.house.owner && currentUser.house.owner.id === currentUser.id;
+
+        if (isOwner) {
+            document.getElementById('send-invite-section').classList.remove('hidden');
+            populateInviteSelect();
+            const sTbody = document.getElementById('sent-invites-table');
+            try {
+                const sent = await apiCall(`/invite/sender/${currentUser.id}`);
+                sTbody.innerHTML = '';
+                if (!sent || sent.length === 0) {
+                    sTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak wysłanych zaproszeń.</td></tr>';
+                } else {
+                    sent.forEach(i => {
+                        const recName = i.recipient ? `${i.recipient.name} ${i.recipient.surname}` : 'Użytkownik';
+
+                        if (i.recipient && i.recipient.house && i.recipient.house.id === currentUser.house.id) {
+                            return;
+                        }
+
+                        sTbody.innerHTML += `<tr>
+                            <td>${recName}</td>
+                            <td style="font-size:12px; color:var(--text-muted);">Oczekujące ⏳</td>
+                            <td><button class="btn-danger" style="padding: 6px 12px; border-radius: 8px; font-size: 12px;" onclick="deleteInvite(${i.id}, 'sent')">Anuluj</button></td>
+                        </tr>`;
+                    });
+
+                    if(sTbody.innerHTML === '') {
+                        sTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak oczekujących zaproszeń.</td></tr>';
+                    }
+                }
+            } catch (e) {
+                console.warn("Brak wysłanych zaproszeń (409/404 z backendu).");
+                sTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak wysłanych zaproszeń.</td></tr>';
+            }
+        } else {
+            document.getElementById('send-invite-section').classList.add('hidden');
+        }
+    }
+
+    async function populateInviteSelect() {
+        try {
+            const users = await apiCall('/user');
+            const sel = document.getElementById('invite-user-select');
+            sel.innerHTML = '<option value="">Wybierz kogoś do zaproszenia...</option>';
+            users.forEach(u => {
+                if (u.id !== currentUser.id && (!u.house || u.house.id !== currentHouseId)) {
+                    sel.innerHTML += `<option value="${u.id}">${u.name} ${u.surname}</option>`;
+                }
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    async function sendInvite() {
+        const recipientId = document.getElementById('invite-user-select').value;
+        if (!recipientId) return alert("Wybierz użytkownika do zaproszenia!");
+
+        const payload = {
+            senderId: currentUser.id,
+            recipientId: parseInt(recipientId)
+        };
+
+        try {
+            await apiCall('/invite', 'POST', payload);
+            alert("Zaproszenie wysłane!");
+            document.getElementById('invite-user-select').value = '';
+            loadInvites();
+        } catch(e) {
+            if(e.message === "409_CONFLICT") alert("Ten użytkownik już ma dom albo zaproszenie czeka w kolejce!");
+            else alert(e.message);
+        }
+    }
+
+    async function acceptInvite(inviteId) {
+        if (!confirm("Akceptując zaproszenie zostaniesz przypisany do tego domu. Kontynuować?")) return;
+        try {
+            await apiCall(`/invite/accept/${inviteId}`, 'POST', currentUser.id);
+            alert("Zaakceptowano zaproszenie!");
+
+            // Po akceptacji opcjonalnie usuwamy to zaproszenie, skoro backend sam tego nie robi (opcjonalne, ale zalecane do utrzymania porządku)
+            try { await apiCall(`/invite/${inviteId}`, 'DELETE'); } catch(e) {}
+
+            checkHouseStatus(); // To odświeży cały widok i zaproszenia
+        } catch(e) { alert("Wystąpił błąd przy akceptacji: " + (e.message === "409_CONFLICT" ? "Konflikt danych / już masz dom" : e.message)); }
+    }
+
+    async function deleteInvite(inviteId, type = 'received') {
+        const msg = type === 'received' ? "Czy na pewno chcesz odrzucić to zaproszenie?" : "Anulować to wysłane zaproszenie?";
+        if (!confirm(msg)) return;
+
+        try {
+            await apiCall(`/invite/${inviteId}`, 'DELETE');
+            loadInvites(); // Odśwież widok
+        } catch (e) {
+            alert("Nie udało się usunąć zaproszenia: " + e.message);
+        }
+    }
+
     function switchTab(tabId, btn) {
-        ['tab-wallet', 'tab-house', 'tab-categories'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        ['tab-wallet', 'tab-house', 'tab-invites'].forEach(id => document.getElementById(id).classList.add('hidden'));
         document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
         document.getElementById(tabId).classList.remove('hidden');
         btn.classList.add('active');

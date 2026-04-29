@@ -1,7 +1,5 @@
 package io.github.wielkikuba.personalfinance.transaction;
 
-import io.github.wielkikuba.personalfinance.category.Category;
-import io.github.wielkikuba.personalfinance.category.CategoryService;
 import io.github.wielkikuba.personalfinance.house.House;
 import io.github.wielkikuba.personalfinance.house.HouseService;
 import io.github.wielkikuba.personalfinance.transaction.dto.UserTransactionSummary;
@@ -23,17 +21,16 @@ import java.util.NoSuchElementException;
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
-    private final CategoryService categoryService;
     private final UserService userService;
     private final HouseService houseService;
 
     @Transactional
-    public Transaction createTransaction(BigDecimal amount, LocalDate date, TransactionType transactionType, Category category, User user){
+    public Transaction createTransaction(BigDecimal amount, LocalDate date, TransactionType transactionType, TransactionCategory transactionCategory, User user){
         Transaction transaction = Transaction.builder()
                 .amount(amount)
                 .date(date)
                 .transactionType(transactionType)
-                .category(category)
+                .transactionCategory(transactionCategory)
                 .user(user)
                 .build();
         return transactionRepository.save(transaction);
@@ -57,7 +54,7 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction modifyTransaction(Long id,TransactionType transactionType,LocalDate date,BigDecimal amount,Long categoryId, Long userId){
+    public Transaction modifyTransaction(Long id,TransactionType transactionType,LocalDate date,BigDecimal amount,TransactionCategory transactionCategory, Long userId){
         Transaction transaction = transactionRepository.findById(id).orElseThrow(()-> new NoSuchElementException("Transaction "+id+ " does not exists"));
         if(transactionType!=null){
             transaction.setTransactionType(transactionType);
@@ -68,8 +65,8 @@ public class TransactionService {
         if(amount!=null){
             transaction.setAmount(amount);
         }
-        if(categoryId!=null){
-            transaction.setCategory(categoryService.getCategoryById(categoryId));
+        if(transactionCategory!=null){
+            transaction.setTransactionCategory(transactionCategory);
         }
         if(userId!=null){
             transaction.setUser(userService.getUserById(userId));
@@ -84,9 +81,9 @@ public class TransactionService {
     }
 
     @Transactional(readOnly = true)
-    public List<Transaction> searchTransactions(Long userId, BigDecimal minAmount, BigDecimal maxAmount,LocalDate startDate, LocalDate endDate,TransactionType type, Long categoryId) {
+    public List<Transaction> searchTransactions(Long userId, BigDecimal minAmount, BigDecimal maxAmount,LocalDate startDate, LocalDate endDate,TransactionType type, TransactionCategory transactionCategory) {
         return transactionRepository.searchTransactions(
-                userId, minAmount, maxAmount, startDate, endDate, type, categoryId);
+                userId, minAmount, maxAmount, startDate, endDate, type, transactionCategory);
     }
 
     @Transactional(readOnly = true)

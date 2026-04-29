@@ -1,179 +1,84 @@
-# Personal Finance API
+# Personal Finance API Documentation
 
-REST API for managing personal finances — users, houses, categories and transactions.
+RESTful API for managing personal finances, including users, shared houses, transactions, and invitations.
 
-## Tech Stack
-
-- Java 26 + Spring Boot
-- MySQL
-- Flyway
-- Docker
-
-## Getting Started
-
-```bash
-cp .env.example .env
-docker compose up --build
-```
-
-App available at: `http://localhost:8080`
+## Base URL
+`/api`
 
 ---
 
-## API Reference
+## 1. Transactions API
+**Endpoint:** `/api/transactions`
 
-### Users `/api/user`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/user` | Get all users |
-| `GET` | `/api/user/{id}` | Get user by ID |
-| `GET` | `/api/user/name/{name}` | Get user by name |
-| `GET` | `/api/user/surname/{surname}` | Get user by surname |
-| `GET` | `/api/user/house/{houseId}` | Get users assigned to a house |
-| `POST` | `/api/user` | Create user |
-| `POST` | `/api/user/assign` | Assign user to a house |
-| `POST` | `/api/user/remove` | Remove user from a house |
-| `PATCH` | `/api/user/{id}` | Update user |
-| `DELETE` | `/api/user/{id}` | Delete user |
-
-<details>
-<summary>Request examples</summary>
-
-**POST** `/api/user`
-```json
-{
-  "name": "Jan",
-  "surname": "Kowalski"
-}
-```
-
-**PATCH** `/api/user/{id}`
-```json
-{
-  "name": "Jan",
-  "surname": "Nowak",
-  "houseId": 1
-}
-```
-
-**POST** `/api/user/assign` and `/api/user/remove`
-```json
-{
-  "userId": 1,
-  "houseId": 2,
-  "userToModifyId": 3
-}
-```
-</details>
+| Method | Path | Description | Request Body / Params | Response |
+|---|---|---|---|---|
+| `POST` | `/` | Create a new transaction | `CreateTransactionRequest` | `201 Created` (`Transaction`) |
+| `GET` | `/` | Get all transactions | - | `200 OK` (`List<Transaction>`) |
+| `GET` | `/{id}` | Get transaction by ID | - | `200 OK` (`Transaction`) |
+| `GET` | `/summary/house/{houseId}` | Get transaction summary for a house | - | `200 OK` (`List<Transaction>`) |
+| `GET` | `/summary/user/{userId}` | Get transaction summary for a user | - | `200 OK` (`UserTransactionSummary`) |
+| `GET` | `/search` | Search transactions via filters | `userId` (req), `minAmount`, `maxAmount`, `startDate`, `endDate`, `type`, `transactionCategory` | `200 OK` (`List<Transaction>`) |
+| `PATCH`| `/{id}` | Modify existing transaction | `UpdateTransactionRequest` | `200 OK` (`Transaction`) |
+| `DELETE`| `/{id}` | Delete a transaction | - | `204 No Content` |
 
 ---
 
-### Houses `/api/house`
+## 2. House API
+**Endpoint:** `/api/house`
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/house/{id}` | Get house by ID |
-| `GET` | `/api/house/street/{street}` | Get houses by street |
-| `GET` | `/api/house/streetAndNumber/{street}/{number}` | Get house by street and number |
-| `GET` | `/api/house/owner/{ownerId}` | Get house by owner |
-| `POST` | `/api/house` | Create house |
-| `DELETE` | `/api/house/{id}` | Delete house |
-
-<details>
-<summary>Request examples</summary>
-
-**POST** `/api/house`
-```json
-{
-  "street": "Oak Street",
-  "number": "5B",
-  "owner_id": 1
-}
-```
-</details>
+| Method | Path | Description | Request Body / Params | Response |
+|---|---|---|---|---|
+| `POST` | `/` | Create a new house | `CreateHouseRequest` | `201 Created` (`House`) |
+| `GET` | `/{id}` | Get house by ID | - | `200 OK` (`House`) |
+| `GET` | `/street/{street}` | Get houses by street name | - | `200 OK` (`List<House>`) |
+| `GET` | `/streetAndNumber/{street}/{number}`| Get house by street and number | - | `200 OK` (`House`) |
+| `GET` | `/owner/{ownerId}` | Get house by owner ID | - | `200 OK` (`House`) |
+| `DELETE`| `/{houseId}` | Delete a house | `X-Session-User-Id` (Header) | `204 No Content` |
 
 ---
 
-### Transactions `/api/transactions`
+## 3. Invite API
+**Endpoint:** `/api/invite`
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/transactions` | Get all transactions |
-| `GET` | `/api/transactions/{id}` | Get transaction by ID |
-| `GET` | `/api/transactions/search` | Search transactions (filters) |
-| `GET` | `/api/transactions/user/{userId}/summary` | Get user summary |
-| `GET` | `/api/transactions/house/{houseId}/summary` | Get house summary |
-| `POST` | `/api/transactions` | Create transaction |
-| `PATCH` | `/api/transactions/{id}` | Update transaction |
-| `DELETE` | `/api/transactions/{id}` | Delete transaction |
-
-#### GET `/api/transactions/search` — query params
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `userId` | ✅ | User ID |
-| `minAmount` | ❌ | Minimum amount |
-| `maxAmount` | ❌ | Maximum amount |
-| `startDate` | ❌ | Start date (YYYY-MM-DD) |
-| `endDate` | ❌ | End date (YYYY-MM-DD) |
-| `type` | ❌ | `INCOME` or `EXPENSE` |
-| `categoryId` | ❌ | Category ID |
-
-<details>
-<summary>Request and response examples</summary>
-
-**POST** `/api/transactions`
-```json
-{
-  "amount": 100.50,
-  "date": "2026-04-26",
-  "transactionType": "INCOME",
-  "categoryId": 1,
-  "userId": 2
-}
-```
-
-**PATCH** `/api/transactions/{id}`
-```json
-{
-  "transactionType": "EXPENSE",
-  "date": "2026-04-26",
-  "amount": 200.00,
-  "categoryId": 1,
-  "userId": 2
-}
-```
-
-**GET** `/api/transactions/user/{userId}/summary` — response
-```json
-{
-  "totalIncome": 5000,
-  "totalOutcome": 2000,
-  "balance": 3000
-}
-```
-</details>
+| Method | Path | Description | Request Body / Params | Response |
+|---|---|---|---|---|
+| `POST` | `/` | Create a new invite | `CreateInviteRequest` | `201 Created` (`Invite`) |
+| `POST` | `/accept/{inviteId}` | Accept an invite | `Long sessionUserId` (Body) | `200 OK` (`UserDataResponse`) |
+| `GET` | `/{id}` | Get invite by ID | - | `200 OK` (`Invite`) |
+| `GET` | `/sender/{id}` | Get invites by sender ID | - | `200 OK` (`List<Invite>`) |
+| `GET` | `/recipient/{id}` | Get invites by recipient ID | - | `200 OK` (`List<Invite>`) |
+| `GET` | `/{senderId}/{recipientId}` | Get invite by sender and recipient | - | `200 OK` (`Invite`) |
 
 ---
 
-### Categories `/api/category`
+## 4. User API
+**Endpoint:** `/api/user`
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/category` | Get all categories |
-| `GET` | `/api/category/{id}` | Get category by ID |
-| `POST` | `/api/category/name/{name}` | Create category |
-| `DELETE` | `/api/category/{id}` | Delete category |
+| Method | Path | Description | Request Body / Params | Response |
+|---|---|---|---|---|
+| `POST` | `/` | Create a new user | `CreateUserRequest` | `201 Created` (`UserDataResponse`) |
+| `POST` | `/assign` | Assign user to a house | `HouseOperationRequest` | `200 OK` (`UserDataResponse`) |
+| `POST` | `/remove` | Remove user from a house | `HouseOperationRequest` | `200 OK` (`UserDataResponse`) |
+| `GET` | `/` | Get all users | - | `200 OK` (`List<UserDataResponse>`) |
+| `GET` | `/{id}` | Get user by ID | - | `200 OK` (`UserDataResponse`) |
+| `GET` | `/house/{houseId}` | Get all users assigned to a house | - | `200 OK` (`List<UserDataResponse>`) |
+| `GET` | `/name/{name}` | Get user by name | - | `200 OK` (`UserDataResponse`) |
+| `GET` | `/surname/{surname}` | Get user by surname | - | `200 OK` (`UserDataResponse`) |
+| `PATCH`| `/{id}` | Modify user details | `UpdateUserRequest` | `200 OK` (`UserDataResponse`) |
+| `DELETE`| `/{id}` | Delete a user | - | `204 No Content` |
 
----
+## Data Transfer Objects (DTOs) Reference
 
-## Status Codes
+### `CreateTransactionRequest`
+- `userId`: `Long`
+- `amount`: `BigDecimal`
+- `date`: `LocalDate`
+- `transactionType`: `TransactionType`
+- `transactionCategory`: `TransactionCategory`
 
-| Code | Meaning |
-|------|---------|
-| `200 OK` | Success |
-| `201 Created` | Resource created |
-| `204 No Content` | Resource deleted |
-| `400 Bad Request` | Invalid input |
-| `404 Not Found` | Resource not found |
+### `HouseOperationRequest`
+- `userId`: `Long`
+- `houseId`: `Long`
+- `userToModifyId`: `Long`
+
+*(Note: Data structures reflect payload expectations mapped directly from API controller signatures).*

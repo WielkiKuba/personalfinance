@@ -1,5 +1,6 @@
 package io.github.wielkikuba.personalfinance.transaction.dto;
 
+import io.github.wielkikuba.personalfinance.transaction.TransactionCategory;
 import io.github.wielkikuba.personalfinance.transaction.TransactionType;
 import lombok.Data;
 
@@ -11,6 +12,6 @@ public class CreateTransactionRequest {
     private BigDecimal amount;
     private LocalDate date;
     private TransactionType transactionType;
-    private Long categoryId;
+    private TransactionCategory transactionCategory;
     private Long userId;
 }

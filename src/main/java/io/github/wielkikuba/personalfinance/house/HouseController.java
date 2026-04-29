@@ -24,29 +24,29 @@ public class HouseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(house);
     }
 
-    @DeleteMapping("/{houseId}/owner/{userId}")
-    public ResponseEntity<Void> deleteHouseById(@PathVariable Long houseId,@PathVariable Long userId){
-        houseService.deleteHouse(houseId,userId);
+    @DeleteMapping("/{houseId}")
+    public ResponseEntity<Void> deleteHouseById(@PathVariable("houseId") Long houseId, @RequestHeader("X-Session-User-Id") Long sessionUserId){
+        houseService.deleteHouse(houseId, sessionUserId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<House> getHouseById(@PathVariable Long id){
+    public ResponseEntity<House> getHouseById(@PathVariable("id") Long id){
         return ResponseEntity.ok(houseService.getHouseById(id));
     }
 
     @GetMapping("/street/{street}")
-    public ResponseEntity<List<House>> getHouseByStreet(@PathVariable String street){
+    public ResponseEntity<List<House>> getHouseByStreet(@PathVariable("street") String street){
         return ResponseEntity.ok(houseService.getHousesByStreet(street));
     }
 
     @GetMapping("/streetAndNumber/{street}/{number}")
-    public ResponseEntity<House> getHouseByStreetAndNumber(@PathVariable String street,@PathVariable String number){
+    public ResponseEntity<House> getHouseByStreetAndNumber(@PathVariable("street") String street, @PathVariable("number") String number){
         return ResponseEntity.ok(houseService.getHouseByStreetAndNumber(street,number));
     }
 
     @GetMapping("/owner/{ownerId}")
-    public ResponseEntity<House> getHouseByOwner(@PathVariable Long ownerId){
+    public ResponseEntity<House> getHouseByOwner(@PathVariable("ownerId") Long ownerId){
         User owner = userService.getUserById(ownerId);
         return ResponseEntity.ok(houseService.getHouseByOwner(owner));
     }

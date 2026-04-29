@@ -16,7 +16,7 @@ public interface TransactionRepository extends JpaRepository<Transaction,Long> {
             "AND (:startDate IS NULL OR t.date >= :startDate) " +
             "AND (:endDate IS NULL OR t.date <= :endDate) " +
             "AND (:type IS NULL OR t.transactionType = :type) " +
-            "AND (:categoryId IS NULL OR t.category.id = :categoryId)")
+            "AND (:category IS NULL OR t.transactionCategory = :category)")
     List<Transaction> searchTransactions(
             @Param("userId") Long userId,
             @Param("minAmount") BigDecimal minAmount,
@@ -24,6 +24,6 @@ public interface TransactionRepository extends JpaRepository<Transaction,Long> {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("type") TransactionType type,
-            @Param("categoryId") Long categoryId
+            @Param("category") TransactionCategory category
     );
 }

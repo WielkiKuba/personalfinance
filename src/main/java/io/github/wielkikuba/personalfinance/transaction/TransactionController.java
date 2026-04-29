@@ -1,7 +1,5 @@
 package io.github.wielkikuba.personalfinance.transaction;
 
-import io.github.wielkikuba.personalfinance.category.Category;
-import io.github.wielkikuba.personalfinance.category.CategoryService;
 import io.github.wielkikuba.personalfinance.transaction.dto.CreateTransactionRequest;
 import io.github.wielkikuba.personalfinance.transaction.dto.UpdateTransactionRequest;
 import io.github.wielkikuba.personalfinance.user.User;
@@ -23,22 +21,20 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionService transactionService;
-    private final CategoryService categoryService;
     private final UserService userService;
 
     @PostMapping
     public ResponseEntity<Transaction> createTransaction(@RequestBody CreateTransactionRequest request) {
-        Category category = categoryService.getCategoryById(request.getCategoryId());
         User user = userService.getUserById(request.getUserId());
 
         Transaction transaction = transactionService.createTransaction(
-                request.getAmount(), request.getDate(), request.getTransactionType(), category, user
+                request.getAmount(), request.getDate(), request.getTransactionType(), request.getTransactionCategory(), user
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(transaction);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTransaction(@PathVariable Long id){
+    public ResponseEntity<Void> deleteTransaction(@PathVariable("id") Long id){
         transactionService.deleteTransaction(id);
         return ResponseEntity.noContent().build();
     }
@@ -49,45 +45,45 @@ public class TransactionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Transaction> getTransactionById(@PathVariable Long id){
+    public ResponseEntity<Transaction> getTransactionById(@PathVariable("id") Long id){
         return ResponseEntity.ok(transactionService.getTransactionById(id));
     }
 
-    @GetMapping("/house/{houseId}/summary")
-    public ResponseEntity<List<Transaction>> getSummaryByHouse(@PathVariable Long houseId){
+    @GetMapping("summary/house/{houseId}")
+    public ResponseEntity<List<Transaction>> getSummaryByHouse(@PathVariable("houseId") Long houseId){
         return ResponseEntity.ok(transactionService.getSummaryByHouse(houseId));
     }
 
-    @GetMapping("/user/{userId}/summary")
-    public ResponseEntity<UserTransactionSummary> getUserSummary(@PathVariable Long userId){
+    @GetMapping("summary/user/{userId}")
+    public ResponseEntity<UserTransactionSummary> getUserSummary(@PathVariable("userId") Long userId){
         return ResponseEntity.ok(transactionService.getUserSummary(userId));
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<Transaction>> searchUserTransactions(
-            @RequestParam Long userId,
-            @RequestParam(required = false) BigDecimal minAmount,
-            @RequestParam(required = false) BigDecimal maxAmount,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(required = false) TransactionType type,
-            @RequestParam(required = false) Long categoryId) {
+            @RequestParam("userId") Long userId,
+            @RequestParam(value = "minAmount", required = false) BigDecimal minAmount,
+            @RequestParam(value = "maxAmount", required = false) BigDecimal maxAmount,
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(value = "type", required = false) TransactionType type,
+            @RequestParam(value = "transactionCategory", required = false) TransactionCategory transactionCategory) {
 
         List<Transaction> results = transactionService.searchTransactions(
-                userId, minAmount, maxAmount, startDate, endDate, type, categoryId);
+                userId, minAmount, maxAmount, startDate, endDate, type, transactionCategory);
 
         return ResponseEntity.ok(results);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Transaction> modifyTransaction(@RequestBody UpdateTransactionRequest transactionRequest,@PathVariable Long id){
+    public ResponseEntity<Transaction> modifyTransaction(@RequestBody UpdateTransactionRequest transactionRequest, @PathVariable("id") Long id){
         return ResponseEntity.ok(
                 transactionService.modifyTransaction(
                         id,
                         transactionRequest.getTransactionType(),
                         transactionRequest.getDate(),
                         transactionRequest.getAmount(),
-                        transactionRequest.getCategoryId(),
+                        transactionRequest.getTransactionCategory(),
                         transactionRequest.getUserId()
                 )
         );

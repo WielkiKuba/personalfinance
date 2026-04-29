@@ -4,6 +4,7 @@ import io.github.wielkikuba.personalfinance.house.HouseService;
 import io.github.wielkikuba.personalfinance.user.dto.CreateUserRequest;
 import io.github.wielkikuba.personalfinance.user.dto.HouseOperationRequest;
 import io.github.wielkikuba.personalfinance.user.dto.UpdateUserRequest;
+import io.github.wielkikuba.personalfinance.user.dto.UserDataResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,54 +21,55 @@ public class UserController {
     private final HouseService houseService;
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers(){
+    public ResponseEntity<List<UserDataResponse>> getAllUsers(){
         List<User> userList = userService.getUserList();
-        return ResponseEntity.ok(userList);
+        return ResponseEntity.ok(userService.userToDtoConverter(userList));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<User> modifyUser(@RequestBody UpdateUserRequest userRequest,@PathVariable Long id){
-        return ResponseEntity.ok(userService.modifyUser(id,userRequest.getName(),userRequest.getSurname(),userRequest.getHouseId()));
+    public ResponseEntity<UserDataResponse> modifyUser(@RequestBody UpdateUserRequest userRequest, @PathVariable("id") Long id){
+        return ResponseEntity.ok(userService.userToDtoConverter(userService.modifyUser(id,userRequest.getName(),userRequest.getSurname(),userRequest.getHouseId())));
     }
 
     @PostMapping("/assign")
-    public ResponseEntity<User> assignUserToHouse(@RequestBody HouseOperationRequest houseRequest){
-        return ResponseEntity.ok(userService.modifyHouseAssignment(houseRequest.getUserId(),houseRequest.getHouseId(),houseRequest.getUserToModifyId(),true));
+    public ResponseEntity<UserDataResponse> assignUserToHouse(@RequestBody HouseOperationRequest houseRequest){
+        return ResponseEntity.ok(userService.userToDtoConverter(userService.modifyHouseAssignment(houseRequest.getUserId(),houseRequest.getHouseId(),houseRequest.getUserToModifyId(),true)));
     }
 
     @PostMapping("/remove")
-    public ResponseEntity<User> divestUserFromHouse(@RequestBody HouseOperationRequest houseRequest){
-        return ResponseEntity.ok(userService.modifyHouseAssignment(houseRequest.getUserId(),houseRequest.getHouseId(),houseRequest.getUserToModifyId(),false));
+    public ResponseEntity<UserDataResponse> divestUserFromHouse(@RequestBody HouseOperationRequest houseRequest){
+        return ResponseEntity.ok(userService.userToDtoConverter(userService.modifyHouseAssignment(houseRequest.getUserId(),houseRequest.getHouseId(),houseRequest.getUserToModifyId(),false)));
     }
 
     @GetMapping("/house/{houseId}")
-    public ResponseEntity<List<User>> getUserListByHouse(@PathVariable Long houseId){
+    public ResponseEntity<List<UserDataResponse>> getUserListByHouse(@PathVariable("houseId") Long houseId){
         List<User> userList = userService.getUserListByHouse(houseService.getHouseById(houseId));
-        return ResponseEntity.ok(userList);
+        return ResponseEntity.ok(userService.userToDtoConverter(userList));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id){
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<UserDataResponse> getUserById(@PathVariable("id") Long id){
+        return ResponseEntity.ok(userService.userToDtoConverter(userService.getUserById(id)));
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<User> getUserByName(@PathVariable String name){
-        return ResponseEntity.ok(userService.getUserByName(name));
+    public ResponseEntity<UserDataResponse> getUserByName(@PathVariable("name") String name){
+        return ResponseEntity.ok(userService.userToDtoConverter(userService.getUserByName(name)));
     }
+
     @GetMapping("/surname/{surname}")
-    public ResponseEntity<User> getUserBySurname(@PathVariable String surname){
-        return ResponseEntity.ok(userService.getUserBySurname(surname));
+    public ResponseEntity<UserDataResponse> getUserBySurname(@PathVariable("surname") String surname){
+        return ResponseEntity.ok(userService.userToDtoConverter(userService.getUserBySurname(surname)));
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody CreateUserRequest createUserRequest){
+    public ResponseEntity<UserDataResponse> createUser(@RequestBody CreateUserRequest createUserRequest){
         User user = userService.createUser(createUserRequest.getName(),createUserRequest.getSurname());
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.userToDtoConverter(user));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id){
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }

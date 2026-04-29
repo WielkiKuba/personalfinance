@@ -2,11 +2,13 @@ package io.github.wielkikuba.personalfinance.user;
 
 import io.github.wielkikuba.personalfinance.house.House;
 import io.github.wielkikuba.personalfinance.house.HouseService;
+import io.github.wielkikuba.personalfinance.user.dto.UserDataResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -108,5 +110,19 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<User> getUserListByHouse(House house){
         return userRepository.findByHouse(house);
+    }
+
+    @Transactional
+    public UserDataResponse userToDtoConverter(User user){
+        return UserDataResponse.builder().id(user.getId()).name(user.getName()).surname(user.getSurname()).house(user.getHouse()).build();
+    }
+
+    @Transactional
+    public List<UserDataResponse> userToDtoConverter(List<User> userList){
+        List<UserDataResponse> userDataResponseList = new ArrayList<>();
+        for(User user:userList){
+            userDataResponseList.add(UserDataResponse.builder().id(user.getId()).name(user.getName()).surname(user.getSurname()).house(user.getHouse()).build());
+        }
+        return userDataResponseList;
     }
 }

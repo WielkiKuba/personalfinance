@@ -5,6 +5,7 @@ import io.github.wielkikuba.personalfinance.transaction.dto.UpdateTransactionReq
 import io.github.wielkikuba.personalfinance.user.User;
 import io.github.wielkikuba.personalfinance.user.UserService;
 import io.github.wielkikuba.personalfinance.transaction.dto.UserTransactionSummary;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class TransactionController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<Transaction> createTransaction(@RequestBody CreateTransactionRequest request) {
+    public ResponseEntity<Transaction> createTransaction(@Valid @RequestBody CreateTransactionRequest request) {
         User user = userService.getUserById(request.getUserId());
 
         Transaction transaction = transactionService.createTransaction(

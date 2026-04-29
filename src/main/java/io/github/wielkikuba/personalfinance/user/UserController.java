@@ -5,6 +5,7 @@ import io.github.wielkikuba.personalfinance.user.dto.CreateUserRequest;
 import io.github.wielkikuba.personalfinance.user.dto.HouseOperationRequest;
 import io.github.wielkikuba.personalfinance.user.dto.UpdateUserRequest;
 import io.github.wielkikuba.personalfinance.user.dto.UserDataResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,17 +28,17 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<UserDataResponse> modifyUser(@RequestBody UpdateUserRequest userRequest, @PathVariable("id") Long id){
+    public ResponseEntity<UserDataResponse> modifyUser(@RequestBody UpdateUserRequest userRequest, @RequestHeader("X-Session-User-Id") Long id){
         return ResponseEntity.ok(userService.userToDtoConverter(userService.modifyUser(id,userRequest.getName(),userRequest.getSurname(),userRequest.getHouseId())));
     }
 
     @PostMapping("/assign")
-    public ResponseEntity<UserDataResponse> assignUserToHouse(@RequestBody HouseOperationRequest houseRequest){
+    public ResponseEntity<UserDataResponse> assignUserToHouse(@Valid @RequestBody HouseOperationRequest houseRequest){
         return ResponseEntity.ok(userService.userToDtoConverter(userService.modifyHouseAssignment(houseRequest.getUserId(),houseRequest.getHouseId(),houseRequest.getUserToModifyId(),true)));
     }
 
     @PostMapping("/remove")
-    public ResponseEntity<UserDataResponse> divestUserFromHouse(@RequestBody HouseOperationRequest houseRequest){
+    public ResponseEntity<UserDataResponse> divestUserFromHouse(@Valid @RequestBody HouseOperationRequest houseRequest){
         return ResponseEntity.ok(userService.userToDtoConverter(userService.modifyHouseAssignment(houseRequest.getUserId(),houseRequest.getHouseId(),houseRequest.getUserToModifyId(),false)));
     }
 
@@ -63,7 +64,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDataResponse> createUser(@RequestBody CreateUserRequest createUserRequest){
+    public ResponseEntity<UserDataResponse> createUser(@Valid @RequestBody CreateUserRequest createUserRequest){
         User user = userService.createUser(createUserRequest.getName(),createUserRequest.getSurname());
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.userToDtoConverter(user));
     }

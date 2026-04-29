@@ -3,6 +3,7 @@ package io.github.wielkikuba.personalfinance.house;
 import io.github.wielkikuba.personalfinance.house.dto.CreateHouseRequest;
 import io.github.wielkikuba.personalfinance.user.User;
 import io.github.wielkikuba.personalfinance.user.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class HouseController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<House> createHouse(@RequestBody CreateHouseRequest houseTransferObject){
+    public ResponseEntity<House> createHouse(@Valid @RequestBody CreateHouseRequest houseTransferObject){
         House house =  houseService.createHouse(houseTransferObject.getStreet(),houseTransferObject.getNumber(),userService.getUserById(houseTransferObject.getOwner_id()));
         return ResponseEntity.status(HttpStatus.CREATED).body(house);
     }

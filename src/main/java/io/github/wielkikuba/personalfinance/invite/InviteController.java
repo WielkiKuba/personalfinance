@@ -2,6 +2,7 @@ package io.github.wielkikuba.personalfinance.invite;
 
 import io.github.wielkikuba.personalfinance.invite.dto.CreateInviteRequest;
 import io.github.wielkikuba.personalfinance.user.dto.UserDataResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class InviteController {
     private final InviteService inviteService;
 
     @PostMapping
-    public ResponseEntity<Invite> createInvite(@RequestBody CreateInviteRequest createInviteRequest){
+    public ResponseEntity<Invite> createInvite(@Valid @RequestBody CreateInviteRequest createInviteRequest){
         return ResponseEntity.status(HttpStatus.CREATED).body(inviteService.createInvite(createInviteRequest.getSenderId(),createInviteRequest.getRecipientId()));
     }
 
@@ -42,7 +43,7 @@ public class InviteController {
     }
 
     @PostMapping("accept/{inviteId}")
-    public ResponseEntity<UserDataResponse> inviteAccept(@PathVariable("inviteId") Long inviteId, @RequestBody Long sessionUserId){
+    public ResponseEntity<UserDataResponse> inviteAccept(@PathVariable("inviteId") Long inviteId, @RequestHeader("X-Session-User-Id") Long sessionUserId){
         return ResponseEntity.ok(inviteService.inviteAccept(inviteId,sessionUserId));
     }
 

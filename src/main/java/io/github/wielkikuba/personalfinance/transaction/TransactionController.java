@@ -1,6 +1,7 @@
 package io.github.wielkikuba.personalfinance.transaction;
 
 import io.github.wielkikuba.personalfinance.transaction.dto.CreateTransactionRequest;
+import io.github.wielkikuba.personalfinance.transaction.dto.TransactionDataResponse;
 import io.github.wielkikuba.personalfinance.transaction.dto.UpdateTransactionRequest;
 import io.github.wielkikuba.personalfinance.user.User;
 import io.github.wielkikuba.personalfinance.user.UserService;
@@ -25,13 +26,13 @@ public class TransactionController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<Transaction> createTransaction(@Valid @RequestBody CreateTransactionRequest request) {
+    public ResponseEntity<TransactionDataResponse> createTransaction(@Valid @RequestBody CreateTransactionRequest request) {
         User user = userService.getUserById(request.getUserId());
 
         Transaction transaction = transactionService.createTransaction(
                 request.getAmount(), request.getDate(), request.getTransactionType(), request.getTransactionCategory(), user
         );
-        return ResponseEntity.status(HttpStatus.CREATED).body(transaction);
+        return ResponseEntity.status(HttpStatus.CREATED).body(TransactionDataResponse.from(transaction));
     }
 
     @DeleteMapping("/{id}")
@@ -41,18 +42,18 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Transaction>> getTransactionList(){
-        return ResponseEntity.ok(transactionService.getAllTransactions());
+    public ResponseEntity<List<TransactionDataResponse>> getTransactionList(){
+        return ResponseEntity.ok(TransactionDataResponse.from(transactionService.getAllTransactions()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Transaction> getTransactionById(@PathVariable("id") Long id){
-        return ResponseEntity.ok(transactionService.getTransactionById(id));
+    public ResponseEntity<TransactionDataResponse> getTransactionById(@PathVariable("id") Long id){
+        return ResponseEntity.ok(TransactionDataResponse.from(transactionService.getTransactionById(id)));
     }
 
     @GetMapping("summary/house/{houseId}")
-    public ResponseEntity<List<Transaction>> getSummaryByHouse(@PathVariable("houseId") Long houseId){
-        return ResponseEntity.ok(transactionService.getSummaryByHouse(houseId));
+    public ResponseEntity<List<TransactionDataResponse>> getSummaryByHouse(@PathVariable("houseId") Long houseId){
+        return ResponseEntity.ok(TransactionDataResponse.from(transactionService.getSummaryByHouse(houseId)));
     }
 
     @GetMapping("summary/user/{userId}")
@@ -61,7 +62,7 @@ public class TransactionController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Transaction>> searchUserTransactions(
+    public ResponseEntity<List<TransactionDataResponse>> searchUserTransactions(
             @RequestParam("userId") Long userId,
             @RequestParam(value = "minAmount", required = false) BigDecimal minAmount,
             @RequestParam(value = "maxAmount", required = false) BigDecimal maxAmount,
@@ -73,19 +74,21 @@ public class TransactionController {
         List<Transaction> results = transactionService.searchTransactions(
                 userId, minAmount, maxAmount, startDate, endDate, type, transactionCategory);
 
-        return ResponseEntity.ok(results);
+        return ResponseEntity.ok(TransactionDataResponse.from(results));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Transaction> modifyTransaction(@RequestBody UpdateTransactionRequest transactionRequest, @PathVariable("id") Long id){
+    public ResponseEntity<TransactionDataResponse> modifyTransaction(@RequestBody UpdateTransactionRequest transactionRequest, @PathVariable("id") Long id){
         return ResponseEntity.ok(
-                transactionService.modifyTransaction(
+                TransactionDataResponse.from(
+                    transactionService.modifyTransaction(
                         id,
                         transactionRequest.getTransactionType(),
                         transactionRequest.getDate(),
                         transactionRequest.getAmount(),
                         transactionRequest.getTransactionCategory(),
                         transactionRequest.getUserId()
+                    )
                 )
         );
     }

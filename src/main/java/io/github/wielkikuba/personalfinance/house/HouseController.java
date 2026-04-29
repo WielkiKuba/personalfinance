@@ -1,6 +1,7 @@
 package io.github.wielkikuba.personalfinance.house;
 
 import io.github.wielkikuba.personalfinance.house.dto.CreateHouseRequest;
+import io.github.wielkikuba.personalfinance.house.dto.HouseDataResponse;
 import io.github.wielkikuba.personalfinance.user.User;
 import io.github.wielkikuba.personalfinance.user.UserService;
 import jakarta.validation.Valid;
@@ -20,9 +21,9 @@ public class HouseController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<House> createHouse(@Valid @RequestBody CreateHouseRequest houseTransferObject){
+    public ResponseEntity<HouseDataResponse> createHouse(@Valid @RequestBody CreateHouseRequest houseTransferObject){
         House house =  houseService.createHouse(houseTransferObject.getStreet(),houseTransferObject.getNumber(),userService.getUserById(houseTransferObject.getOwner_id()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(house);
+        return ResponseEntity.status(HttpStatus.CREATED).body(HouseDataResponse.from(house));
     }
 
     @DeleteMapping("/{houseId}")
@@ -32,23 +33,23 @@ public class HouseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<House> getHouseById(@PathVariable("id") Long id){
-        return ResponseEntity.ok(houseService.getHouseById(id));
+    public ResponseEntity<HouseDataResponse> getHouseById(@PathVariable("id") Long id){
+        return ResponseEntity.ok(HouseDataResponse.from(houseService.getHouseById(id)));
     }
 
     @GetMapping("/street/{street}")
-    public ResponseEntity<List<House>> getHouseByStreet(@PathVariable("street") String street){
-        return ResponseEntity.ok(houseService.getHousesByStreet(street));
+    public ResponseEntity<List<HouseDataResponse>> getHouseByStreet(@PathVariable("street") String street){
+        return ResponseEntity.ok(HouseDataResponse.from(houseService.getHousesByStreet(street)));
     }
 
     @GetMapping("/streetAndNumber/{street}/{number}")
-    public ResponseEntity<House> getHouseByStreetAndNumber(@PathVariable("street") String street, @PathVariable("number") String number){
-        return ResponseEntity.ok(houseService.getHouseByStreetAndNumber(street,number));
+    public ResponseEntity<HouseDataResponse> getHouseByStreetAndNumber(@PathVariable("street") String street, @PathVariable("number") String number){
+        return ResponseEntity.ok(HouseDataResponse.from(houseService.getHouseByStreetAndNumber(street,number)));
     }
 
     @GetMapping("/owner/{ownerId}")
-    public ResponseEntity<House> getHouseByOwner(@PathVariable("ownerId") Long ownerId){
+    public ResponseEntity<HouseDataResponse> getHouseByOwner(@PathVariable("ownerId") Long ownerId){
         User owner = userService.getUserById(ownerId);
-        return ResponseEntity.ok(houseService.getHouseByOwner(owner));
+        return ResponseEntity.ok(HouseDataResponse.from(houseService.getHouseByOwner(owner)));
     }
 }

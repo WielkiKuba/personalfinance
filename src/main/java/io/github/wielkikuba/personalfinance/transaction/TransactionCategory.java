@@ -9,5 +9,6 @@ public enum TransactionCategory {
     UBRANIA,
     EDUKACJA,
     OSZCZEDNOSCI,
+    PRACA,
     INNE
 }

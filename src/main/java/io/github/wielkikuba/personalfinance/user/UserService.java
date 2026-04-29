@@ -111,18 +111,4 @@ public class UserService {
     public List<User> getUserListByHouse(House house){
         return userRepository.findByHouse(house);
     }
-
-    @Transactional
-    public UserDataResponse userToDtoConverter(User user){
-        return UserDataResponse.builder().id(user.getId()).name(user.getName()).surname(user.getSurname()).house(user.getHouse()).build();
-    }
-
-    @Transactional
-    public List<UserDataResponse> userToDtoConverter(List<User> userList){
-        List<UserDataResponse> userDataResponseList = new ArrayList<>();
-        for(User user:userList){
-            userDataResponseList.add(UserDataResponse.builder().id(user.getId()).name(user.getName()).surname(user.getSurname()).house(user.getHouse()).build());
-        }
-        return userDataResponseList;
-    }
 }

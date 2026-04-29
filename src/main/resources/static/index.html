@@ -343,7 +343,6 @@
             </table>
         </div>
 
-        <!-- Sekcja widoczna tylko dla właściciela domu -->
         <div id="send-invite-section" class="hidden">
             <div class="summary-box" style="margin-top: 32px; padding: 20px;">
                 <h3 style="margin-top: 0;">Wyślij zaproszenie 📤</h3>
@@ -383,21 +382,29 @@
         }
         const res = await fetch(API + endpoint, options);
         if (!res.ok) {
-            const errorMsg = `Błąd HTTP: ${res.status}`;
             if (res.status === 403) throw new Error("Odmowa dostępu! Tylko właściciel może to zrobić.");
             if (res.status === 409) throw new Error("409_CONFLICT");
-            throw new Error(errorMsg);
+            throw new Error(`Błąd HTTP: ${res.status}`);
         }
         return res.status !== 204 ? await res.json() : null;
     }
 
+    // ─── Helpers do nowych nazw pól DTO ──────────────────────────────────────
+
+    // TransactionDataResponse używa "localDate" zamiast "date"
+    // oraz "userDataResponse" zamiast "user"
+    function txDate(t) { return t.localDate || t.date || ''; }
+    function txUser(t) { return t.userDataResponse || t.user || null; }
+
+    // ─── LOGIN ────────────────────────────────────────────────────────────────
+
     async function fetchUsersForLogin() {
         try {
             const users = await apiCall('/user');
-            const selLogin = document.getElementById('user-login-select');
-            selLogin.innerHTML = '<option value="">-- Wybierz swój profil --</option>';
+            const sel = document.getElementById('user-login-select');
+            sel.innerHTML = '<option value="">-- Wybierz swój profil --</option>';
             users.forEach(u => {
-                selLogin.innerHTML += `<option value="${u.id}">${u.name} ${u.surname}</option>`;
+                sel.innerHTML += `<option value="${u.id}">${u.name} ${u.surname}</option>`;
             });
         } catch (e) { alert("Błąd połączenia z backendem!"); }
     }
@@ -405,14 +412,14 @@
     async function createUser() {
         const name = document.getElementById('newUserName').value;
         const surname = document.getElementById('newUserSurname').value;
-        if(!name || !surname) return alert("Wypełnij imię i nazwisko!");
+        if (!name || !surname) return alert("Wypełnij imię i nazwisko!");
         try { await apiCall('/user', 'POST', { name, surname }); alert("Utworzono!"); fetchUsersForLogin(); }
-        catch(e) { alert(e.message); }
+        catch (e) { alert(e.message); }
     }
 
     async function login() {
         const userId = document.getElementById('user-login-select').value;
-        if(!userId) return alert("Wybierz użytkownika!");
+        if (!userId) return alert("Wybierz użytkownika!");
         currentUser = await apiCall(`/user/${userId}`);
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
@@ -434,7 +441,7 @@
         checkHouseStatus();
     }
 
-    /* === PORTFEL / TRANSAKCJE === */
+    // ─── PORTFEL / TRANSAKCJE ─────────────────────────────────────────────────
 
     async function loadUserSummary() {
         try {
@@ -444,11 +451,11 @@
             const el = document.getElementById('user-balance-total');
             el.innerText = s.balance.toFixed(2);
             el.style.color = s.balance >= 0 ? 'var(--success)' : 'var(--danger)';
-        } catch(e) {
+        } catch (e) {
             console.warn("Brak transakcji lub błąd pobierania podsumowania usera.");
-            document.getElementById('user-income-total').innerText = '0.00';
-            document.getElementById('user-expense-total').innerText = '0.00';
-            document.getElementById('user-balance-total').innerText = '0.00';
+            ['user-income-total','user-expense-total','user-balance-total'].forEach(id => {
+                document.getElementById(id).innerText = '0.00';
+            });
             document.getElementById('user-balance-total').style.color = 'var(--text-main)';
         }
     }
@@ -456,41 +463,43 @@
     async function loadTransactions() {
         let url = `/transactions/search?userId=${currentUser.id}`;
         const start = document.getElementById('fStartDate').value.trim();
-        const end = document.getElementById('fEndDate').value.trim();
-        const min = document.getElementById('fMin').value.trim();
-        const max = document.getElementById('fMax').value.trim();
-        const type = document.getElementById('fType').value.trim();
+        const end   = document.getElementById('fEndDate').value.trim();
+        const min   = document.getElementById('fMin').value.trim();
+        const max   = document.getElementById('fMax').value.trim();
+        const type  = document.getElementById('fType').value.trim();
 
-        if(start) url += `&startDate=${start}`;
-        if(end) url += `&endDate=${end}`;
-        if(min) url += `&minAmount=${min}`;
-        if(max) url += `&maxAmount=${max}`;
-        if(type) url += `&type=${type}`;
+        if (start) url += `&startDate=${start}`;
+        if (end)   url += `&endDate=${end}`;
+        if (min)   url += `&minAmount=${min}`;
+        if (max)   url += `&maxAmount=${max}`;
+        if (type)  url += `&type=${type}`;
 
         try {
             const transactions = await apiCall(url);
             const tbody = document.getElementById('transactions-table');
             tbody.innerHTML = '';
-            if(transactions.length === 0) {
+            if (!transactions || transactions.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak transakcji.</td></tr>';
                 return;
             }
             transactions.forEach(t => {
                 const isIncome = t.transactionType === 'INCOME';
-                const badge = isIncome ? '<span class="badge income">+</span>' : '<span class="badge expense">-</span>';
-                const color = isIncome ? 'var(--success)' : 'var(--danger)';
-                const sign = isIncome ? '+' : '-';
-                const categoryName = t.transactionCategory ? t.transactionCategory : '-';
+                const badge    = isIncome ? '<span class="badge income">+</span>' : '<span class="badge expense">-</span>';
+                const color    = isIncome ? 'var(--success)' : 'var(--danger)';
+                const sign     = isIncome ? '+' : '-';
+                // Pole daty to "localDate" w nowym DTO
+                const dateStr  = txDate(t);
+                const category = t.transactionCategory || '-';
 
                 tbody.innerHTML += `<tr>
-                    <td style="color:var(--text-muted);font-size:12px;">${t.date}</td>
+                    <td style="color:var(--text-muted);font-size:12px;">${dateStr}</td>
                     <td>${badge}</td>
                     <td style="font-weight:800;font-size:14px;color:${color};white-space:nowrap;">${sign}${t.amount.toFixed(2)}</td>
-                    <td style="font-size:12px;">${categoryName}</td>
+                    <td style="font-size:12px;">${category}</td>
                     <td><button class="btn-danger" onclick="deleteTransaction(${t.id})">✕</button></td>
                 </tr>`;
             });
-        } catch(e) { console.error(e); }
+        } catch (e) { console.error(e); }
     }
 
     function resetFilters() {
@@ -507,24 +516,25 @@
             transactionCategory: document.getElementById('tCategory').value,
             userId: currentUser.id
         };
-        if(!payload.amount || !payload.transactionCategory) return alert("Wypełnij kwotę i wybierz kategorię!");
+        if (!payload.amount || !payload.transactionCategory) return alert("Wypełnij kwotę i wybierz kategorię!");
         try {
             await apiCall('/transactions', 'POST', payload);
             document.getElementById('tAmount').value = '';
-            loadTransactions(); loadUserSummary();
-            if(currentHouseId) loadHouseSummary(currentHouseId);
-        } catch(e) { alert(e.message); }
+            loadTransactions();
+            loadUserSummary();
+            if (currentHouseId) loadHouseSummary(currentHouseId);
+        } catch (e) { alert(e.message); }
     }
 
     async function deleteTransaction(id) {
-        if(!confirm('Usunąć?')) return;
+        if (!confirm('Usunąć?')) return;
         await apiCall(`/transactions/${id}`, 'DELETE');
-        loadTransactions(); loadUserSummary();
-        if(currentHouseId) loadHouseSummary(currentHouseId);
+        loadTransactions();
+        loadUserSummary();
+        if (currentHouseId) loadHouseSummary(currentHouseId);
     }
 
-
-    /* === DOM === */
+    // ─── DOM ──────────────────────────────────────────────────────────────────
 
     async function checkHouseStatus() {
         currentUser = await apiCall(`/user/${currentUser.id}`);
@@ -540,34 +550,42 @@
             loadHouseDetails(currentHouseId);
             loadHouseSummary(currentHouseId);
         }
-        loadInvites(); // Odśwież zaproszenia za każdym razem gdy ładujemy dom
+        loadInvites();
     }
 
     async function createHouse() {
-        const payload = { street: document.getElementById('hStreet').value, number: document.getElementById('hNumber').value, owner_id: currentUser.id };
-        if(!payload.street || !payload.number) return alert("Podaj ulicę i numer!");
+        const payload = {
+            street: document.getElementById('hStreet').value,
+            number: document.getElementById('hNumber').value,
+            owner_id: currentUser.id
+        };
+        if (!payload.street || !payload.number) return alert("Podaj ulicę i numer!");
         try { await apiCall('/house', 'POST', payload); checkHouseStatus(); }
-        catch(e) { alert(e.message); }
+        catch (e) { alert(e.message); }
     }
 
     async function deleteHouse() {
-        if(!confirm('Czy na pewno chcesz usunąć dom? Ta operacja jest nieodwracalna.')) return;
+        if (!confirm('Czy na pewno chcesz usunąć dom? Ta operacja jest nieodwracalna.')) return;
         try {
             await apiCall(`/house/${currentHouseId}`, 'DELETE', null, { 'X-Session-User-Id': currentUser.id });
             currentHouseId = null;
             currentUser.house = null;
             checkHouseStatus();
-        } catch(e) { alert(e.message); }
+        } catch (e) { alert(e.message); }
     }
 
     async function leaveHouse() {
-        if(!confirm("Czy na pewno chcesz opuścić dom?")) return;
+        if (!confirm("Czy na pewno chcesz opuścić dom?")) return;
         try {
-            await apiCall("/user/remove", "POST", { userId: currentUser.id, houseId: currentHouseId, userToModifyId: currentUser.id });
+            await apiCall('/user/remove', 'POST', {
+                userId: currentUser.id,
+                houseId: currentHouseId,
+                userToModifyId: currentUser.id
+            });
             currentHouseId = null;
             currentUser.house = null;
             checkHouseStatus();
-        } catch(e) { alert(e.message); }
+        } catch (e) { alert(e.message); }
     }
 
     async function loadHouseDetails(houseId) {
@@ -584,8 +602,8 @@
             const tbody = document.getElementById('house-members-table');
             tbody.innerHTML = '';
             members.forEach(m => {
-                const isMe = m.id === currentUser.id ? ' (Ty)' : '';
-                const crown = m.id === house.owner.id ? ' 👑' : '';
+                const isMe    = m.id === currentUser.id ? ' (Ty)' : '';
+                const crown   = m.id === house.owner.id ? ' 👑' : '';
                 const actionBtn = (isOwner && m.id !== currentUser.id)
                     ? `<button class="btn-danger" onclick="removeFromHouse(${m.id}, ${houseId})">Wyrzuć</button>`
                     : '-';
@@ -595,7 +613,7 @@
                     <td>${actionBtn}</td>
                 </tr>`;
             });
-        } catch(e) { console.error(e); }
+        } catch (e) { console.error(e); }
     }
 
     async function loadHouseSummary(houseId) {
@@ -604,24 +622,28 @@
             let income = 0, expense = 0;
             transactions.forEach(t => t.transactionType === 'INCOME' ? income += t.amount : expense += t.amount);
             const balance = income - expense;
-            document.getElementById('house-income-total').innerText = income.toFixed(2);
+            document.getElementById('house-income-total').innerText  = income.toFixed(2);
             document.getElementById('house-expense-total').innerText = expense.toFixed(2);
             const el = document.getElementById('house-balance-total');
-            el.innerText = balance.toFixed(2);
-            el.style.color = balance >= 0 ? 'var(--success)' : 'var(--danger)';
-        } catch(e) { console.error(e); }
+            el.innerText    = balance.toFixed(2);
+            el.style.color  = balance >= 0 ? 'var(--success)' : 'var(--danger)';
+        } catch (e) { console.error(e); }
     }
 
     async function removeFromHouse(userToRemoveId, houseId) {
-        if(!confirm("Wyrzucić użytkownika z domu?")) return;
+        if (!confirm("Wyrzucić użytkownika z domu?")) return;
         try {
-            await apiCall('/user/remove', 'POST', { userId: currentUser.id, houseId: houseId, userToModifyId: userToRemoveId });
-            loadHouseDetails(houseId); loadHouseSummary(houseId);
-        } catch(e) { alert(e.message); }
+            await apiCall('/user/remove', 'POST', {
+                userId: currentUser.id,
+                houseId: houseId,
+                userToModifyId: userToRemoveId
+            });
+            loadHouseDetails(houseId);
+            loadHouseSummary(houseId);
+        } catch (e) { alert(e.message); }
     }
 
-
-    /* === ZAPROSZENIA === */
+    // ─── ZAPROSZENIA ──────────────────────────────────────────────────────────
 
     async function loadInvites() {
         if (!currentUser) return;
@@ -631,45 +653,38 @@
         try {
             const received = await apiCall(`/invite/recipient/${currentUser.id}`);
             rTbody.innerHTML = '';
-            if (!received || received.length === 0) {
-                rTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak otrzymanych zaproszeń.</td></tr>';
+            const pending = (received || []).filter(i => {
+                // Ukryj zaproszenia do domu, w którym użytkownik już jest
+                const houseObj = i.sender && i.sender.house ? i.sender.house : null;
+                return !(currentUser.house && houseObj && currentUser.house.id === houseObj.id);
+            });
+
+            if (pending.length === 0) {
+                rTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak oczekujących zaproszeń.</td></tr>';
             } else {
-                received.forEach(i => {
+                pending.forEach(i => {
                     const senderName = i.sender ? `${i.sender.name} ${i.sender.surname}` : 'Właściciel';
-
-                    // Odczytujemy dom od usera NADAWCY, bo sam obiekt Invite go nie posiada!
-                    const houseObj = (i.sender && i.sender.house) ? i.sender.house : null;
-                    const houseName = houseObj ? `${houseObj.street} ${houseObj.number}` : 'Dom';
-
-                    // Jeśli użytkownik z jakiegoś powodu odebrał zaproszenie do domu w którym już jest - ukrywamy je na froncie
-                    if (currentUser.house && houseObj && currentUser.house.id === houseObj.id) {
-                        return;
-                    }
-
+                    const houseObj   = i.sender && i.sender.house ? i.sender.house : null;
+                    const houseName  = houseObj ? `${houseObj.street} ${houseObj.number}` : 'Dom';
                     rTbody.innerHTML += `<tr>
                         <td>${senderName}</td>
                         <td style="font-size:12px;">${houseName}</td>
                         <td>
                             <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                <button class="btn-primary" style="padding: 6px 10px; border-radius: 8px; font-size: 11px; flex: 1;" onclick="acceptInvite(${i.id})">Akceptuj</button>
-                                <button class="btn-danger" style="padding: 6px 10px; border-radius: 8px; font-size: 11px; flex: 1;" onclick="deleteInvite(${i.id}, 'received')">Odrzuć</button>
+                                <button class="btn-primary" style="padding:6px 10px;border-radius:8px;font-size:11px;flex:1;" onclick="acceptInvite(${i.id})">Akceptuj</button>
+                                <button class="btn-danger"  style="padding:6px 10px;border-radius:8px;font-size:11px;flex:1;" onclick="deleteInvite(${i.id},'received')">Odrzuć</button>
                             </div>
                         </td>
                     </tr>`;
                 });
-
-                if(rTbody.innerHTML === '') {
-                     rTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak oczekujących zaproszeń.</td></tr>';
-                }
             }
         } catch (e) {
-            console.warn("Błąd lub oczekiwany brak zaproszeń (409/404 z backendu).");
+            console.warn("Brak zaproszeń lub błąd serwera.");
             rTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak otrzymanych zaproszeń.</td></tr>';
         }
 
-        // Wysłane zaproszenia (Tylko jeśli currentUser jest właścicielem domu)
+        // Wysłane zaproszenia – tylko dla właściciela domu
         const isOwner = currentUser.house && currentUser.house.owner && currentUser.house.owner.id === currentUser.id;
-
         if (isOwner) {
             document.getElementById('send-invite-section').classList.remove('hidden');
             populateInviteSelect();
@@ -677,30 +692,25 @@
             try {
                 const sent = await apiCall(`/invite/sender/${currentUser.id}`);
                 sTbody.innerHTML = '';
-                if (!sent || sent.length === 0) {
-                    sTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak wysłanych zaproszeń.</td></tr>';
+                const pending = (sent || []).filter(i =>
+                    !(i.recipient && i.recipient.house && i.recipient.house.id === currentUser.house.id)
+                );
+                if (pending.length === 0) {
+                    sTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak oczekujących zaproszeń.</td></tr>';
                 } else {
-                    sent.forEach(i => {
+                    pending.forEach(i => {
                         const recName = i.recipient ? `${i.recipient.name} ${i.recipient.surname}` : 'Użytkownik';
-
-                        if (i.recipient && i.recipient.house && i.recipient.house.id === currentUser.house.id) {
-                            return;
-                        }
-
                         sTbody.innerHTML += `<tr>
                             <td>${recName}</td>
-                            <td style="font-size:12px; color:var(--text-muted);">Oczekujące ⏳</td>
-                            <td><button class="btn-danger" style="padding: 6px 12px; border-radius: 8px; font-size: 12px;" onclick="deleteInvite(${i.id}, 'sent')">Anuluj</button></td>
+                            <td style="font-size:12px;color:var(--text-muted);">Oczekujące ⏳</td>
+                            <td><button class="btn-danger" style="padding:6px 12px;border-radius:8px;font-size:12px;" onclick="deleteInvite(${i.id},'sent')">Anuluj</button></td>
                         </tr>`;
                     });
-
-                    if(sTbody.innerHTML === '') {
-                        sTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak oczekujących zaproszeń.</td></tr>';
-                    }
                 }
             } catch (e) {
-                console.warn("Brak wysłanych zaproszeń (409/404 z backendu).");
-                sTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak wysłanych zaproszeń.</td></tr>';
+                console.warn("Brak wysłanych zaproszeń.");
+                document.getElementById('sent-invites-table').innerHTML =
+                    '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;">Brak wysłanych zaproszeń.</td></tr>';
             }
         } else {
             document.getElementById('send-invite-section').classList.add('hidden');
@@ -723,19 +733,13 @@
     async function sendInvite() {
         const recipientId = document.getElementById('invite-user-select').value;
         if (!recipientId) return alert("Wybierz użytkownika do zaproszenia!");
-
-        const payload = {
-            senderId: currentUser.id,
-            recipientId: parseInt(recipientId)
-        };
-
         try {
-            await apiCall('/invite', 'POST', payload);
+            await apiCall('/invite', 'POST', { senderId: currentUser.id, recipientId: parseInt(recipientId) });
             alert("Zaproszenie wysłane!");
             document.getElementById('invite-user-select').value = '';
             loadInvites();
-        } catch(e) {
-            if(e.message === "409_CONFLICT") alert("Ten użytkownik już ma dom albo zaproszenie czeka w kolejce!");
+        } catch (e) {
+            if (e.message === "409_CONFLICT") alert("Ten użytkownik już ma dom albo zaproszenie czeka w kolejce!");
             else alert(e.message);
         }
     }
@@ -743,26 +747,24 @@
     async function acceptInvite(inviteId) {
         if (!confirm("Akceptując zaproszenie zostaniesz przypisany do tego domu. Kontynuować?")) return;
         try {
-            await apiCall(`/invite/accept/${inviteId}`, 'POST', currentUser.id);
+            // ID sesji przekazywane przez header, nie przez body
+            await apiCall(`/invite/accept/${inviteId}`, 'POST', null, { 'X-Session-User-Id': currentUser.id });
             alert("Zaakceptowano zaproszenie!");
-
-            // Po akceptacji opcjonalnie usuwamy to zaproszenie, skoro backend sam tego nie robi (opcjonalne, ale zalecane do utrzymania porządku)
-            try { await apiCall(`/invite/${inviteId}`, 'DELETE'); } catch(e) {}
-
-            checkHouseStatus(); // To odświeży cały widok i zaproszenia
-        } catch(e) { alert("Wystąpił błąd przy akceptacji: " + (e.message === "409_CONFLICT" ? "Konflikt danych / już masz dom" : e.message)); }
+            // Sprzątamy zaproszenie po akceptacji
+            try { await apiCall(`/invite/${inviteId}`, 'DELETE'); } catch (e) {}
+            checkHouseStatus();
+        } catch (e) {
+            alert("Wystąpił błąd przy akceptacji: " + (e.message === "409_CONFLICT" ? "Konflikt danych / już masz dom" : e.message));
+        }
     }
 
     async function deleteInvite(inviteId, type = 'received') {
-        const msg = type === 'received' ? "Czy na pewno chcesz odrzucić to zaproszenie?" : "Anulować to wysłane zaproszenie?";
+        const msg = type === 'received' ? "Odrzucić to zaproszenie?" : "Anulować wysłane zaproszenie?";
         if (!confirm(msg)) return;
-
         try {
             await apiCall(`/invite/${inviteId}`, 'DELETE');
-            loadInvites(); // Odśwież widok
-        } catch (e) {
-            alert("Nie udało się usunąć zaproszenia: " + e.message);
-        }
+            loadInvites();
+        } catch (e) { alert("Nie udało się usunąć zaproszenia: " + e.message); }
     }
 
     function switchTab(tabId, btn) {

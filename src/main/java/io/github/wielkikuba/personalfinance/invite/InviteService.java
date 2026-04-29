@@ -56,7 +56,7 @@ public class InviteService {
         boolean isOwner = false;
         if(sessionUser.getId().equals(invite.getRecipient().getId())){isOwner = true;}
         if(isOwner){
-            UserDataResponse userDataResponse = userService.userToDtoConverter(userService.modifyUser(sessionUserId,null,null,invite.getSender().getHouse().getId()));
+            UserDataResponse userDataResponse = UserDataResponse.from(userService.modifyUser(sessionUserId,null,null,invite.getSender().getHouse().getId()));
             deleteInvite(inviteId);
             return userDataResponse;
         }else{

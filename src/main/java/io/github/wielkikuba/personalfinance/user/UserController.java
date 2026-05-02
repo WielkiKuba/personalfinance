@@ -33,13 +33,13 @@ public class UserController {
     }
 
     @PostMapping("/assign")
-    public ResponseEntity<UserDataResponse> assignUserToHouse(@Valid @RequestBody HouseOperationRequest houseRequest){
-        return ResponseEntity.ok(UserDataResponse.from(userService.modifyHouseAssignment(houseRequest.getUserId(),houseRequest.getHouseId(),houseRequest.getUserToModifyId(),true)));
+    public ResponseEntity<UserDataResponse> assignUserToHouse(@Valid @RequestBody HouseOperationRequest houseRequest,@RequestHeader("X-Session-User-Id") Long sessionUserId){
+        return ResponseEntity.ok(UserDataResponse.from(userService.modifyHouseAssignment(sessionUserId,houseRequest.getHouseId(),houseRequest.getUserToModifyId(),true)));
     }
 
     @PostMapping("/remove")
-    public ResponseEntity<UserDataResponse> divestUserFromHouse(@Valid @RequestBody HouseOperationRequest houseRequest){
-        return ResponseEntity.ok(UserDataResponse.from(userService.modifyHouseAssignment(houseRequest.getUserId(),houseRequest.getHouseId(),houseRequest.getUserToModifyId(),false)));
+    public ResponseEntity<UserDataResponse> divestUserFromHouse(@Valid @RequestBody HouseOperationRequest houseRequest,@RequestHeader("X-Session-User-Id") Long sessionUserId){
+        return ResponseEntity.ok(UserDataResponse.from(userService.modifyHouseAssignment(sessionUserId,houseRequest.getHouseId(),houseRequest.getUserToModifyId(),false)));
     }
 
     @GetMapping("/house/{houseId}")
@@ -69,9 +69,9 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(UserDataResponse.from(user));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id){
-        userService.deleteUser(id);
+    @DeleteMapping
+    public ResponseEntity<Void> deleteUser(@RequestHeader("X-Session-User-Id") Long sessionUserId){
+        userService.deleteUser(sessionUserId);
         return ResponseEntity.noContent().build();
     }
 }

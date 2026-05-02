@@ -2,13 +2,11 @@ package io.github.wielkikuba.personalfinance.user;
 
 import io.github.wielkikuba.personalfinance.house.House;
 import io.github.wielkikuba.personalfinance.house.HouseService;
-import io.github.wielkikuba.personalfinance.user.dto.UserDataResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -47,31 +45,29 @@ public class UserService {
         User userSession = getUserById(userSessionId);
         User userToModify = getUserById(userToModifyId);
         boolean isOwner = userSession.getId().equals(house.getOwner().getId());
-        if (isOwner && userToModifyId.equals(house.getOwner().getId()) && !isAdding) {
-            throw new RuntimeException("Owner cannot remove yourself from house");
-        }
-        if (isOwner) {
-            if (isAdding) {
+        if(isOwner){
+            if(isAdding){
                 if (userToModify.getHouse() == null) {
                     userToModify.setHouse(house);
                 } else {
                     throw new SecurityException("User already belongs to another house");
                 }
-            } else {
-                userToModify.setHouse(null);
+            }else{
+                if(userSessionId.equals(userToModifyId)){
+                    throw new RuntimeException("You cannot delete yourself from house");
+                }else{
+                    userToModify.setHouse(null);
+                }
             }
             return userRepository.save(userToModify);
+        }else{
+            throw new SecurityException("No permissions. Only the homeowner can manage household members.");
         }
-        if (userSessionId.equals(userToModifyId) && !isAdding) {
-            userToModify.setHouse(null);
-            return userRepository.save(userToModify);
-        }
-        throw new SecurityException("No permissions. Only the homeowner can manage household members.");
     }
 
     @Transactional
-    public User modifyUser(Long id, String name,String surname,Long houseId){
-        User user = getUserById(id);
+    public User modifyUser(Long sessionUserId, String name,String surname,Long houseId){
+        User user = getUserById(sessionUserId);
         if(name!=null){
             user.setName(name);
         }
